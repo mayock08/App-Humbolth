@@ -23,9 +23,49 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasMaxLength(100)
                 .IsRequired();
 
+            entity.Property(e => e.FullName)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(e => e.PaternalLastName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.MaternalLastName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.FatherFullName)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            entity.Property(e => e.MotherFullName)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
             entity.Property(e => e.Email)
                 .HasMaxLength(200)
                 .IsRequired();
+
+            entity.Property(e => e.HealthStatus)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            entity.Property(e => e.BloodType)
+                .HasMaxLength(10)
+                .IsRequired(false);
+
+            entity.Property(e => e.ChronicIllnessDetails)
+                .HasMaxLength(500)
+                .IsRequired(false);
+
+            entity.Property(e => e.ConcurrentContactNames)
+                .HasMaxLength(500)
+                .IsRequired(false);
+
+            entity.Property(e => e.Observations)
+                .HasMaxLength(1000)
+                .IsRequired(false);
 
             entity.HasIndex(e => e.Email)
                 .IsUnique();
