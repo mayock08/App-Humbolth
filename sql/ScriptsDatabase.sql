@@ -8,12 +8,50 @@
 
 CREATE TABLE IF NOT EXISTS public.students (
     id              BIGSERIAL PRIMARY KEY,
-    name            TEXT        NOT NULL,
-    grade           VARCHAR(20) NOT NULL,
-    guardian_phone  VARCHAR(30)
+    
+    -- Datos Básicos
+    first_name      VARCHAR(100) NOT NULL,
+    paternal_surname VARCHAR(100) NOT NULL,
+    maternal_surname VARCHAR(100),
+    gender          VARCHAR(20),
+    birth_date      DATE,
+    birth_place     VARCHAR(100),
+    nationality     VARCHAR(50),
+    marital_status  VARCHAR(20),
+    curp            VARCHAR(20),
+    photo_url       TEXT,
+
+    -- Domicilio
+    street_address  VARCHAR(200),
+    cross_streets   VARCHAR(200),
+    city            VARCHAR(100),
+    state           VARCHAR(100),
+    zip_code        VARCHAR(10),
+    email           VARCHAR(100),
+    alternate_email VARCHAR(100),
+    phone           VARCHAR(20),
+
+    -- Escolaridad
+    education_level VARCHAR(50),
+    current_grade   VARCHAR(20),
+    current_group   VARCHAR(10),
+    internal_id     VARCHAR(20),
+    official_id     VARCHAR(20),
+
+    -- Status
+    status          VARCHAR(20) DEFAULT 'Activo',
+    admission_date  DATE,
+    admission_cycle VARCHAR(50),
+
+    -- Notas
+    notes           TEXT,
+    observations    TEXT,
+
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_students_grade ON public.students(grade);
+CREATE INDEX IF NOT EXISTS idx_students_current_grade ON public.students(current_grade);
 
 
 -- =====================================================================
@@ -164,11 +202,11 @@ CREATE INDEX IF NOT EXISTS idx_attendances_date
 -- 8) Datos demo mínimos (opcional)
 -- =====================================================================
 
-INSERT INTO public.students (name, grade, guardian_phone)
+INSERT INTO public.students (first_name, paternal_surname, current_grade, phone)
 VALUES
-    ('Ana López',  '1A', '555-111-2222'),
-    ('Juan Pérez', '1B', '555-222-3333'),
-    ('María García','2A', NULL)
+    ('Ana', 'López', '1A', '555-111-2222'),
+    ('Juan', 'Pérez', '1B', '555-222-3333'),
+    ('María', 'García', '2A', NULL)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO public.teachers (full_name, email, phone)
