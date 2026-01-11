@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Users, BookOpen, UserCog, Settings, LogOut } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import i18n from '../i18n';
+import Logo from '../assets/Logo.png';
 
 const SidebarItem = ({ icon: Icon, label, to, active }) => (
     <Link to={to} className={`flex flex-col items-center justify-center py-4 w-full hover:bg-blue-50 transition-colors ${active ? 'text-primary' : 'text-gray-500'}`}>
@@ -14,30 +15,49 @@ const SidebarItem = ({ icon: Icon, label, to, active }) => (
 const DashboardLayout = ({ children }) => {
     const { t } = useTranslation();
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Clear all authentication data
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+
+        // Redirect to login
+        navigate('/login');
+    };
 
     return (
         <div className="flex h-screen bg-gray-50 font-sans">
             {/* Sidebar */}
             <aside className="w-24 bg-white shadow-md flex flex-col items-center py-6 z-10">
                 <div className="mb-8">
-                    <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
-                        EDU
-                    </div>
+                    <img src={Logo} alt="Logo" className="w-16 h-16 object-contain" />
                 </div>
 
                 <nav className="flex-1 w-full flex flex-col gap-2">
                     <SidebarItem icon={LayoutDashboard} label={t('dashboard')} to="/dashboard" active={location.pathname === '/dashboard'} />
                     <SidebarItem icon={Users} label={t('attendance')} to="/attendance" />
-                    <SidebarItem icon={BookOpen} label={t('subjects')} to="/subjects" />
+                    <SidebarItem icon={BookOpen} label={t('subjects')} to="/subjects" active={location.pathname === '/subjects'} />
                     <SidebarItem icon={UserCog} label="Supervisor" to="/supervisor" />
                     <SidebarItem icon={Settings} label={t('settings')} to="/settings" />
                 </nav>
 
-                <div className="mt-auto mb-6 flex flex-col gap-2">
+                <div className="mt-auto mb-6 flex flex-col gap-3 w-full items-center">
                     <div className="flex gap-1 justify-center">
                         <button onClick={() => i18n.changeLanguage('es')} className={`text-xs font-bold px-2 py-1 rounded ${i18n.language === 'es' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-100'}`}>ES</button>
                         <button onClick={() => i18n.changeLanguage('en')} className={`text-xs font-bold px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-100'}`}>EN</button>
                     </div>
+
+                    <button
+                        onClick={handleLogout}
+                        className="flex flex-col items-center justify-center py-3 w-full hover:bg-red-50 transition-colors text-red-500 group"
+                        title="Cerrar Sesión"
+                    >
+                        <LogOut size={20} className="mb-1 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-medium">Salir</span>
+                    </button>
                 </div>
             </aside>
 

@@ -1,0 +1,125 @@
+-- =========================================================
+-- EXAMEN DE IQ - ESQUEMA BASE (PostgreSQL / Supabase)
+-- =========================================================
+
+CREATE TABLE app_users (
+    id              BIGSERIAL PRIMARY KEY,
+    full_name       VARCHAR(200) NOT NULL,
+    email           VARCHAR(200) UNIQUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE iq_tests (
+    id                  BIGSERIAL PRIMARY KEY,
+    name                VARCHAR(200) NOT NULL,
+    description         TEXT,
+    total_time_minutes  INT NOT NULL DEFAULT 45,
+    is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE iq_sections (
+    id                  BIGSERIAL PRIMARY KEY,
+    test_id             BIGINT NOT NULL REFERENCES iq_tests(id) ON DELETE CASCADE,
+    name                VARCHAR(200) NOT NULL,
+    description         TEXT,
+    order_index         INT NOT NULL,
+    time_limit_minutes  INT,
+    CONSTRAINT uq_iq_sections UNIQUE(test_id, order_index)
+);
+
+CREATE TABLE iq_questions (
+    id              BIGSERIAL PRIMARY KEY,
+    section_id      BIGINT NOT NULL REFERENCES iq_sections(id) ON DELETE CASCADE,
+    text            TEXT NOT NULL,
+    question_type   VARCHAR(50) NOT NULL DEFAULT 'multiple_choice', -- por si luego agregas otro tipo
+    difficulty      INT NOT NULL DEFAULT 1,  -- 1-5
+    order_index     INT NOT NULL,
+    score           INT NOT NULL DEFAULT 1,
+    ability_domain  VARCHAR(50) NOT NULL,    -- 'verbal','logic','math','visual','memory','speed'
+    image_url       TEXT,
+    CONSTRAINT uq_iq_questions UNIQUE(section_id, order_index)
+);
+
+CREATE TABLE iq_options (
+    id              BIGSERIAL PRIMARY KEY,
+    question_id     BIGINT NOT NULL REFERENCES iq_questions(id) ON DELETE CASCADE,
+    option_key      VARCHAR(5) NOT NULL,         -- A,B,C,D...
+    text            TEXT NOT NULL,
+    is_correct      BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT uq_iq_options UNIQUE(question_id, option_key)
+);
+
+CREATE TABLE iq_test_attempts (
+    id                          BIGSERIAL PRIMARY KEY,
+    user_id                     BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    test_id                     BIGINT NOT NULL REFERENCES iq_tests(id) ON DELETE CASCADE,
+    started_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at                TIMESTAMPTZ,
+    raw_score                   INT,
+    max_score                   INT,
+    iq_score                    INT,
+    percentile                  NUMERIC(5,2),
+    verbal_score                INT,
+    logic_score                 INT,
+    math_score                  INT,
+    visual_score                INT,
+    memory_score                INT,
+    speed_score                 INT
+);
+
+CREATE TABLE iq_answers (
+    id                  BIGSERIAL PRIMARY KEY,
+    attempt_id          BIGINT NOT NULL REFERENCES iq_test_attempts(id) ON DELETE CASCADE,
+    question_id         BIGINT NOT NULL REFERENCES iq_questions(id) ON DELETE CASCADE,
+    selected_option_id  BIGINT NOT NULL REFERENCES iq_options(id),
+    is_correct          BOOLEAN NOT NULL,
+    response_time_ms    INT,
+    CONSTRAINT uq_iq_answers UNIQUE(attempt_id, question_id)
+);
+
+
+
+---  add custom example 
+
+
+
+INSERT INTO iq_tests (name, description, total_time_minutes)
+VALUES ('IQ General Adultos', 'Prueba de habilidades cognitivas generales', 40)
+RETURNING id;
+
+-- Supón que regresa 1
+-- Secciones
+INSERT INTO iq_sections (test_id, name, description, order_index, time_limit_minutes)
+VALUES
+(1, 'Razonamiento Lógico', 'Patrones y secuencias lógicas', 1, 10),
+(1, 'Razonamiento Matemático', 'Operaciones y problemas numéricos', 2, 10),
+(1, 'Verbal', 'Analogías y comprensión verbal', 3, 10),
+(1, 'Visual / Espacial', 'Figuras y relaciones espaciales', 4, 10);
+
+-- Preguntas lógicas (ejemplo)
+INSERT INTO iq_questions (section_id, text, difficulty, order_index, score, ability_domain)
+VALUES
+(1, '¿Cuál número sigue en la serie? 2, 4, 8, 16, ?', 1, 1, 1, 'logic'),
+(1, 'Si todos los gatos son animales y algunos animales son negros, entonces ¿algunos gatos podrían ser negros?', 2, 2, 1, 'logic');
+
+-- Opciones para pregunta 1 (id supongamos 1)
+INSERT INTO iq_options (question_id, option_key, text, is_correct)
+VALUES
+(1, 'A', '24', FALSE),
+(1, 'B', '30', FALSE),
+(1, 'C', '32', TRUE),
+(1, 'D', '34', FALSE);
+
+-- Opciones para pregunta 2 (id supongamos 2)
+INSERT INTO iq_options (question_id, option_key, text, is_correct)
+VALUES
+(2, 'A', 'Sí', TRUE),
+(2, 'B', 'No', FALSE),
+(2, 'C', 'Es imposible saberlo', FALSE),
+(2, 'D', 'Solo si son blancos', FALSE);
+
+-- Puedes seguir metiendo preguntas por sección siguiendo el mismo patrón.
+
+
+

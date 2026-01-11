@@ -126,3 +126,8 @@ C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\refint\Ba
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\Backend.API.pdb
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\Backend.API.genruntimeconfig.cache
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\ref\Backend.API.dll
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\rjimswa.dswa.cache.json
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Debug\net9.0\swae.build.ex.cache

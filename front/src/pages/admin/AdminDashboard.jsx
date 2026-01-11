@@ -1,8 +1,8 @@
 import React from 'react';
-import DashboardLayout from '../layouts/DashboardLayout';
-import StatsSection from '../components/Dashboard/StatsSection';
-import FiltersSection from '../components/Dashboard/FiltersSection';
-import StudentList from '../components/Dashboard/StudentList';
+import DashboardLayout from '../../layouts/DashboardLayout';
+import StatsSection from '../../components/Dashboard/StatsSection';
+import FiltersSection from '../../components/Dashboard/FiltersSection';
+import StudentList from '../../components/Dashboard/StudentList';
 
 const Dashboard = () => {
     return (

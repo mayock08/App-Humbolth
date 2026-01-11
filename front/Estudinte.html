@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Escolar · Dashboard Docente</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configuración ligera para Tailwind (opcional)
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Scrollbar sutil para tablas */
+    .thin-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+    .thin-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    .thin-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="h-full">
+  <div class="min-h-screen flex">
+    <!-- Sidebar comprimido -->
+    <aside class="w-20 bg-white shadow-sm border-r border-slate-200 flex flex-col items-center py-4">
+      <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white grid place-content-center text-xl font-bold">EDU</div>
+      <nav class="mt-8 space-y-6 text-slate-600">
+        <button title="Docente" class="group flex flex-col items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M11.7 2.006a.75.75 0 0 1 .6 0l8.25 3.75a.75.75 0 0 1 0 1.388l-8.25 3.75a.75.75 0 0 1-.6 0L3.45 7.144a.75.75 0 0 1 0-1.388L11.7 2.006Z"/><path d="M3.431 10.384a.75.75 0 0 1 1.019-.366L12 13.84l7.55-3.822a.75.75 0 0 1 .653 1.352l-8.25 4.177a.75.75 0 0 1-.654 0l-8.25-4.177a.75.75 0 0 1-.366-1.019Z"/><path d="M3.431 14.884a.75.75 0 0 1 1.019-.366L12 18.34l7.55-3.822a.75.75 0 1 1 .653 1.352l-8.25 4.177a.75.75 0 0 1-.654 0l-8.25-4.177a.75.75 0 0 1-.366-1.019Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_docente">Docente</span>
+        </button>
+        <button id="btnAsistencia" title="Asistencia" class="group flex flex-col items-center gap-1" onclick="setVista('asistencia')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.761 9.761 0 0 0 12 2.25Zm.75 4.5a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 .33.62l3.75 2.5a.75.75 0 0 0 .84-1.24L12.75 12.7V6.75Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_asistencia">Asistencia</span>
+        </button>
+        <button id="btnMaterias" title="Materias" class="group flex flex-col items-center gap-1" onclick="setVista('materias')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M6.75 2.25A2.25 2.25 0 0 0 4.5 4.5v15A2.25 2.25 0 0 0 6.75 21.75h10.5A2.25 2.25 0 0 0 19.5 19.5v-15a2.25 2.25 0 0 0-2.25-2.25H6.75Zm.75 3h9v12h-9V5.25Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_materias">Materias</span>
+        </button>
+        <button id="btnPerfil" title="Perfil Alumno" class="group flex flex-col items-center gap-1" onclick="setVista('perfil')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2.25A7.75 7.75 0 0 0 4.25 22h15.5A7.75 7.75 0 0 0 12 14.25Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_perfil">Perfil</span>
+        </button>
+        <button title="Supervisión" class="group flex flex-col items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M12 1.5A10.5 10.5 0 1 0 22.5 12 10.512 10.512 0 0 0 12 1.5Zm0 3a3 3 0 1 1-3 3 3 3 0 0 1 3-3Zm0 15a7.5 7.5 0 0 1-6.364-3.5 6 6 0 0 1 12.728 0A7.5 7.5 0 0 1 12 19.5Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_supervisor">Supervisor</span>
+        </button>
+        <button title="Config" class="group flex flex-col items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-brand-600"><path d="M10.325 2.317a1.5 1.5 0 0 1 3.35 0l.24 1.68a7.507 7.507 0 0 1 2.17.9l1.576-.9a1.5 1.5 0 1 1 1.5 2.598l-1.373.784c.245.558.429 1.148.546 1.76l1.68.24a1.5 1.5 0 1 1 0 2.99l-1.68.24a7.51 7.51 0 0 1-.9 2.17l.9 1.576a1.5 1.5 0 1 1-2.598 1.5l-.784-1.373a7.507 7.507 0 0 1-1.76.546l-.24 1.68a1.5 1.5 0 1 1-2.99 0l-.24-1.68a7.51 7.51 0 0 1-2.17-.9l-1.576.9a1.5 1.5 0 1 1-1.5-2.598l1.373-.784a7.507 7.507 0 0 1-.546-1.76l-1.68-.24a1.5 1.5 0 1 1 0-2.99l1.68-.24c.117-.612.301-1.202.546-1.76l-1.373-.784a1.5 1.5 0 1 1 1.5-2.598l1.576.9c.671-.409 1.398-.719 2.17-.9l.24-1.68Z"/></svg>
+          <span class="text-[10px]" data-i18n="sb_ajustes">Ajustes</span>
+        </button>
+      </nav>
+      <div class="mt-auto text-[10px] text-slate-400">v1.0</div>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1">
+      <!-- Topbar -->
+      <header class="h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h1 class="text-xl font-semibold text-slate-800" data-i18n="panel_title">Panel del Docente</h1>
+          <span id="badgeVista" class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-700" data-i18n="badge_asistencia">Asistencia</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="hidden md:flex items-center gap-2 text-slate-500 text-sm">
+            <span id="fechaSpan"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="langSelect" class="sr-only">Idioma</label>
+            <select id="langSelect" class="text-sm border rounded-xl px-2 py-1 bg-white" aria-label="Seleccionar idioma">
+              <option value="es">Español</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/100?img=12" alt="Docente" class="w-9 h-9 rounded-xl object-cover"/>
+            <div class="leading-tight">
+              <div class="text-sm font-medium text-slate-700">Mtra. Daniela López</div>
+              <div class="text-xs text-slate-500">Docente · Matemáticas 1°B</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <section class="p-4 space-y-4">
+        <!-- ========== ASISTENCIA ==========` -->
+        <div id="asistenciaWrap" class="space-y-4">
+          <!-- Tarjetas superiores -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div class="text-slate-400 text-xs">Grupo</div>
+              <div class="text-slate-800 text-lg font-semibold">1° Secundaria · B</div>
+              <div class="text-slate-500 text-sm">Materia: Matemáticas</div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div class="text-slate-400 text-xs">Resumen de hoy</div>
+              <div class="flex items-center gap-6 mt-2">
+                <div class="text-center"><div class="text-2xl font-semibold" id="presentesCnt">0</div><div class="text-xs text-slate-500">Asistieron</div></div>
+                <div class="text-center"><div class="text-2xl font-semibold" id="faltasCnt">0</div><div class="text-xs text-slate-500">Faltas</div></div>
+                <div class="text-center"><div class="text-2xl font-semibold" id="retardosCnt">0</div><div class="text-xs text-slate-500">Retardos</div></div>
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-slate-400 text-xs">Foto del día</div>
+                  <div class="text-slate-800 text-sm">Sube evidencia (opcional)</div>
+                </div>
+                <label for="fotoDia" class="px-3 py-1.5 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-xl cursor-pointer">Subir</label>
+                <input id="fotoDia" type="file" accept="image/*" class="hidden"/>
+              </div>
+              <div id="previewFoto" class="mt-3 hidden">
+                <img id="imgFoto" src="" alt="Foto del día" class="w-full h-36 object-cover rounded-xl border"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Herramientas -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+            <div class="flex items-center gap-2">
+              <input id="buscarInput" type="text" placeholder="Buscar alumno..." data-i18n-placeholder="buscar_alumno" class="w-64 px-3 py-2 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" />
+              <button id="limpiarBtn" class="px-3 py-2 text-sm border rounded-xl hover:bg-slate-50">Limpiar</button>
+            </div>
+            <div class="flex items-center gap-2">
+            <label class="text-sm text-slate-600" data-i18n="marcar_todos">Marcar todos como</label>
+            <select id="marcarTodos" class="px-3 py-2 text-sm border rounded-xl">
+                <option value="">Selecciona…</option>
+                <option value="Asistió">Asistió</option>
+                <option value="Falta">Falta</option>
+                <option value="Retardo">Retardo</option>
+                <option value="Justificada">Justificada</option>
+              </select>
+              <button id="exportCsv" class="px-3 py-2 text-sm bg-white border rounded-xl hover:bg-slate-50" data-i18n="export_csv">Exportar CSV</button>
+            </div>
+          </div>
+
+          <!-- Lista rápida de alumnos (demo) -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-slate-800 font-semibold text-sm">Lista rápida de alumnos (demo)</h3>
+              <span id="alumnosCount" class="text-xs text-slate-500">0 alumnos</span>
+            </div>
+            <div class="overflow-x-auto thin-scrollbar">
+              <ul id="listaRapida" class="flex gap-2 min-w-max"></ul>
+            </div>
+          </div>
+
+          <!-- Tabla de asistencia -->
+          <div id="tablaAsistencia" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto thin-scrollbar">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="px-4 py-3 text-left"><span data-i18n="th_alumno">Alumno</span></th>
+                    <th class="px-4 py-3 text-left"><span data-i18n="th_grupo">Grupo</span></th>
+                    <th class="px-4 py-3 text-left"><span data-i18n="th_asistencia">Asistencia</span></th>
+                    <th class="px-4 py-3 text-left"><span data-i18n="th_observacion">Observación</span></th>
+                    <th class="px-4 py-3 text-left"><span data-i18n="th_acciones">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyAlumnos" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- ========== /ASISTENCIA ==========` -->
+
+        <!-- ========== MATERIAS ==========` -->
+        <div id="materiasWrap" class="hidden space-y-4">
+          <!-- Panel descriptivo de materias asignadas -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-slate-800 font-semibold">Resumen de materias asignadas</h2>
+              <span class="text-xs text-slate-500">Español · Matemáticas · Inglés</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <!-- Español -->
+              <article class="border rounded-2xl p-4 hover:shadow-sm transition">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+                  <h3 class="font-medium text-slate-800">Español</h3>
+                </div>
+                <p class="text-sm text-slate-600">Comprensión lectora y redacción. Próxima evidencia: reseña de cuento corto.</p>
+                <ul class="mt-2 text-xs text-slate-500 space-y-1">
+                  <li><span class="font-medium text-slate-700">Grupo:</span> 1°A</li>
+                  <li><span class="font-medium text-slate-700">Horario:</span> Lun · Mié · Vie</li>
+                  <li><span class="font-medium text-slate-700">Pendientes:</span> 2 actividades</li>
+                </ul>
+                <div class="mt-3 flex gap-2">
+                  <button class="px-3 py-1.5 text-xs rounded-xl border hover:bg-slate-50" onclick="abrirModal('Español')">Crear recurso</button>
+                  <button class="px-3 py-1.5 text-xs rounded-xl bg-white border hover:bg-slate-50">Ver planeación</button>
+                </div>
+              </article>
+              <!-- Matemáticas -->
+              <article class="border rounded-2xl p-4 hover:shadow-sm transition">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                  <h3 class="font-medium text-slate-800">Matemáticas</h3>
+                </div>
+                <p class="text-sm text-slate-600">Álgebra básica y resolución de problemas. Próximo: Quiz de ecuaciones.</p>
+                <ul class="mt-2 text-xs text-slate-500 space-y-1">
+                  <li><span class="font-medium text-slate-700">Grupo:</span> 1°B</li>
+                  <li><span class="font-medium text-slate-700">Horario:</span> Mar · Jue</li>
+                  <li><span class="font-medium text-slate-700">Pendientes:</span> 1 examen, 1 tarea</li>
+                </ul>
+                <div class="mt-3 flex gap-2">
+                  <button class="px-3 py-1.5 text-xs rounded-xl border hover:bg-slate-50" onclick="abrirModal('Matemáticas')">Crear recurso</button>
+                  <button class="px-3 py-1.5 text-xs rounded-xl bg-white border hover:bg-slate-50">Ver planeación</button>
+                </div>
+              </article>
+              <!-- Inglés -->
+              <article class="border rounded-2xl p-4 hover:shadow-sm transition">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  <h3 class="font-medium text-slate-800">Inglés</h3>
+                </div>
+                <p class="text-sm text-slate-600">Vocabulario y present simple. Próximo: actividad oral guiada.</p>
+                <ul class="mt-2 text-xs text-slate-500 space-y-1">
+                  <li><span class="font-medium text-slate-700">Grupo:</span> 1°B</li>
+                  <li><span class="font-medium text-slate-700">Horario:</span> Mié</li>
+                  <li><span class="font-medium text-slate-700">Pendientes:</span> 1 actividad</li>
+                </ul>
+                <div class="mt-3 flex gap-2">
+                  <button class="px-3 py-1.5 text-xs rounded-xl border hover:bg-slate-50" onclick="abrirModal('Inglés')">Crear recurso</button>
+                  <button class="px-3 py-1.5 text-xs rounded-xl bg-white border hover:bg-slate-50">Ver planeación</button>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- Grid de materias para gestionar -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-slate-800 font-semibold">Materias del docente</h2>
+              <span class="text-xs text-slate-500">Selecciona una materia y crea recursos</span>
+            </div>
+            <div id="materiasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+          </div>
+
+          <!-- Bandeja de creaciones -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-slate-800 font-semibold">Bandeja de creaciones</h3>
+              <span class="text-xs text-slate-500">Examen · Actividad · Tarea · Quiz · Examen IA</span>
+            </div>
+            <ul id="bandejaLista" class="divide-y divide-slate-100"></ul>
+          </div>
+        </div>
+        <!-- ========== /MATERIAS ==========` -->
+
+        <!-- ========== PERFIL ==========` -->
+        <div id="perfilAlumno" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hidden">
+          <h2 class="text-slate-800 font-semibold mb-3" data-i18n="perfil_title">Perfil de Alumno — Radar de Tendencias</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Datos principales y gráfico -->
+            <div>
+              <div class="flex items-center gap-4 mb-4">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-20 h-20 rounded-xl object-cover border bg-slate-200" alt="Alumno demo">
+                <div class="space-y-2">
+                  <div class="flex gap-2">
+                    <span class="font-medium text-slate-800">Nombre:</span>
+                    <span class="text-slate-700">Juan Pérez</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="font-medium text-slate-800">Grado:</span>
+                    <span class="text-slate-700">3° Secundaria</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="font-medium text-slate-800">Grupo:</span>
+                    <span class="text-slate-700">B</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="font-medium text-slate-800">Matrícula:</span>
+                    <span class="text-slate-700">SEC-23-0451</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-900 rounded-2xl p-4">
+                <canvas id="radarAlumno" width="320" height="320"></canvas>
+              </div>
+            </div>
+            <!-- Información relevante -->
+            <div class="space-y-4">
+              <div class="bg-slate-50 rounded-xl p-4 border">
+                <h3 class="font-semibold text-brand-700 mb-2 text-sm">Datos personales</h3>
+                <ul class="text-xs text-slate-700 space-y-1">
+                  <li><span class="font-medium">Fecha de nacimiento:</span> 15/03/2010</li>
+                  <li><span class="font-medium">CURP:</span> PEJJ100315HDFRZN01</li>
+                  <li><span class="font-medium">Correo:</span> juan.perez@colegio.edu.mx</li>
+                  <li><span class="font-medium">Teléfono:</span> 8112345678</li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 rounded-xl p-4 border">
+                <h3 class="font-semibold text-brand-700 mb-2 text-sm">Familia</h3>
+                <ul class="text-xs text-slate-700 space-y-1">
+                  <li><span class="font-medium">Padre:</span> José Pérez · 8112341111</li>
+                  <li><span class="font-medium">Madre:</span> Laura Gómez · 8112342222</li>
+                  <li><span class="font-medium">Tutor:</span> -</li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 rounded-xl p-4 border">
+                <h3 class="font-semibold text-brand-700 mb-2 text-sm">Dirección</h3>
+                <ul class="text-xs text-slate-700 space-y-1">
+                  <li><span class="font-medium">Calle:</span> Av. Universidad 123</li>
+                  <li><span class="font-medium">Colonia:</span> Centro</li>
+                  <li><span class="font-medium">Ciudad:</span> Monterrey, NL</li>
+                  <li><span class="font-medium">CP:</span> 64000</li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 rounded-xl p-4 border">
+                <h3 class="font-semibold text-brand-700 mb-2 text-sm">Expediente médico</h3>
+                <ul class="text-xs text-slate-700 space-y-1">
+                  <li><span class="font-medium">Alergias:</span> Ninguna</li>
+                  <li><span class="font-medium">Condiciones:</span> Asma leve</li>
+                  <li><span class="font-medium">Seguro médico:</span> IMSS</li>
+                  <li><span class="font-medium">Contacto emergencia:</span> 8112341111</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Sección de Materias con Calificaciones Parciales -->
+          <div class="mt-6">
+            <h3 class="text-slate-800 font-semibold mb-4" data-i18n="calificaciones_title">Calificaciones Parciales por Materia</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead class="bg-brand-50 text-brand-700">
+                  <tr>
+                    <th class="border border-slate-200 px-4 py-2 text-left">Materia</th>
+                    <th class="border border-slate-200 px-4 py-2 text-center">Parcial 1</th>
+                    <th class="border border-slate-200 px-4 py-2 text-center">Parcial 2</th>
+                    <th class="border border-slate-200 px-4 py-2 text-center">Parcial 3</th>
+                    <th class="border border-slate-200 px-4 py-2 text-center">Promedio</th>
+                    <th class="border border-slate-200 px-4 py-2 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="hover:bg-slate-50">
+                    <td class="border border-slate-200 px-4 py-2 font-medium text-slate-800">Matemáticas</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.5</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">9.0</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.8</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center font-semibold text-brand-700">8.8</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center"><span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Aprobado</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="border border-slate-200 px-4 py-2 font-medium text-slate-800">Español</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">9.2</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.9</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">9.3</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center font-semibold text-brand-700">9.1</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center"><span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Excelente</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="border border-slate-200 px-4 py-2 font-medium text-slate-800">Inglés</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">7.5</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.2</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.0</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center font-semibold text-brand-700">7.9</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center"><span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Aprobado</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="border border-slate-200 px-4 py-2 font-medium text-slate-800">Ciencias</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">6.8</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">7.2</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">7.5</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center font-semibold text-orange-600">7.2</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center"><span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">En mejora</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="border border-slate-200 px-4 py-2 font-medium text-slate-800">Historia</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.9</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">9.1</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center text-slate-700">8.7</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center font-semibold text-brand-700">8.9</td>
+                    <td class="border border-slate-200 px-4 py-2 text-center"><span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Excelente</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-brand-50 border border-brand-200 rounded-xl p-3">
+                <div class="text-xs text-brand-600 font-medium">Promedio General</div>
+                <div class="text-2xl font-bold text-brand-700">8.6</div>
+              </div>
+              <div class="bg-green-50 border border-green-200 rounded-xl p-3">
+                <div class="text-xs text-green-600 font-medium">Materias Aprobadas</div>
+                <div class="text-2xl font-bold text-green-700">5 / 5</div>
+              </div>
+              <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                <div class="text-xs text-blue-600 font-medium">Período Actual</div>
+                <div class="text-2xl font-bold text-blue-700">3° Parcial</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de Seguimiento de Calificaciones por Años -->
+          <div class="mt-6">
+            <h3 class="text-slate-800 font-semibold mb-4" data-i18n="seguimiento_title">Seguimiento de Calificaciones (Primaria - Secundaria)</h3>
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div class="mb-4">
+                <canvas id="chartSeguimientoCalificaciones" height="80"></canvas>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-4 text-center">
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">1° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">7.2</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">2° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">7.8</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">3° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">8.1</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">4° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">8.5</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">5° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">8.3</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border">
+                  <div class="text-xs text-slate-500 font-medium">6° Primaria</div>
+                  <div class="text-lg font-bold text-slate-800">8.7</div>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-300">
+                  <div class="text-xs text-blue-600 font-medium">1° Secundaria</div>
+                  <div class="text-lg font-bold text-blue-700">8.4</div>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-300">
+                  <div class="text-xs text-blue-600 font-medium">2° Secundaria</div>
+                  <div class="text-lg font-bold text-blue-700">8.6</div>
+                </div>
+                <div class="p-3 bg-brand-50 rounded-lg border border-brand-300">
+                  <div class="text-xs text-brand-600 font-medium">3° Secundaria</div>
+                  <div class="text-lg font-bold text-brand-700">8.6</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Análisis de Tendencias -->
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                <h4 class="font-semibold text-green-800 mb-2">📈 Tendencia de Desempeño</h4>
+                <p class="text-sm text-green-700 mb-2">El estudiante ha mostrado una mejora consistente desde 1° Primaria hasta 6° Primaria (de 7.2 a 8.7), demostrando dedicación y esfuerzo.</p>
+                <ul class="text-xs text-green-700 space-y-1 ml-4">
+                  <li>✓ Mejora de 1.5 puntos en primaria</li>
+                  <li>✓ Promedio en secundaria: 8.53</li>
+                  <li>✓ Rendimiento sostenido y consistente</li>
+                </ul>
+              </div>
+              <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
+                <h4 class="font-semibold text-blue-800 mb-2">💡 Recomendaciones</h4>
+                <ul class="text-xs text-blue-700 space-y-2">
+                  <li>• Mantener el ritmo de estudio actual</li>
+                  <li>• Reforzar Ciencias en el próximo parcial</li>
+                  <li>• Aprovechar las fortalezas en Español e Historia</li>
+                  <li>• Considerar tutorías en Inglés para optimizar desempeño</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ========== /PERFIL ==========` -->
+
+        <!-- ========== MODAL CREACIÓN ==========` -->
+        <div id="modalCrear" class="fixed inset-0 z-50 hidden">
+          <div class="absolute inset-0 bg-black/40" onclick="cerrarModal()"></div>
+          <div class="relative mx-auto mt-20 w-[92%] max-w-lg bg-white rounded-2xl p-5 shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-lg font-semibold">Crear para <span id="modalMateria" class="text-brand-700"></span></h3>
+              <button onclick="cerrarModal()" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Cerrar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M6.225 4.811a1 1 0 0 0-1.414 1.414L10.586 12l-5.775 5.775a1 1 0 0 0 1.414 1.414L12 13.414l5.775 5.775a1 1 0 0 0 1.414-1.414L13.414 12l5.775-5.775a1 1 0 0 0-1.414-1.414L12 10.586 6.225 4.811Z"/></svg>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <button class="tipoBtn px-3 py-1.5 text-sm rounded-xl border hover:bg-slate-50" data-tipo="Examen">Examen</button>
+              <button class="tipoBtn px-3 py-1.5 text-sm rounded-xl border hover:bg-slate-50" data-tipo="Actividad">Actividad</button>
+              <button class="tipoBtn px-3 py-1.5 text-sm rounded-xl border hover:bg-slate-50" data-tipo="Tarea">Tarea</button>
+              <button class="tipoBtn px-3 py-1.5 text-sm rounded-xl border hover:bg-slate-50" data-tipo="Quiz">Quiz</button>
+              <button class="tipoBtn px-3 py-1.5 text-sm rounded-xl border bg-brand-600 text-white hover:bg-brand-700" data-tipo="Examen IA">Examen IA</button>
+            </div>
+            <form id="formCrear" class="space-y-3">
+              <input type="hidden" id="tipoSeleccionado" />
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">Título</label>
+                <input id="tituloInp" class="w-full px-3 py-2 text-sm border rounded-xl" placeholder="Ej. Examen Parcial 1" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-slate-500 mb-1">Fecha de entrega</label>
+                  <input type="date" id="fechaInp" class="w-full px-3 py-2 text-sm border rounded-xl" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-500 mb-1">Ponderación (%)</label>
+                  <input type="number" id="pondInp" min="0" max="100" value="10" class="w-full px-3 py-2 text-sm border rounded-xl" />
+                </div>
+              </div>
+              <div id="wrapIA" class="hidden">
+                <label class="block text-xs text-slate-500 mb-1">Rúbrica / Indicaciones para IA</label>
+                <textarea id="promptIA" rows="3" class="w-full px-3 py-2 text-sm border rounded-xl" placeholder="Temas, nivel de dificultad, número de preguntas, criterios de evaluación..."></textarea>
+              </div>
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="cerrarModal()" class="px-3 py-2 text-sm border rounded-xl hover:bg-slate-50">Cancelar</button>
+                <button type="submit" class="px-3 py-2 text-sm rounded-xl bg-brand-600 text-white hover:bg-brand-700">Crear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- ========== /MODAL CREACIÓN ==========` -->
+
+        <!-- ========== PANEL PLAN ACADÉMICO (slide-over) ==========` -->
+        <div id="planPanel" class="fixed inset-0 z-50 hidden">
+          <div class="absolute inset-0 bg-black/40" onclick="closePlan()"></div>
+          <aside class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-2xl flex flex-col">
+            <header class="p-4 border-b flex items-center justify-between">
+              <div>
+                <div class="text-xs text-slate-500">Plan académico</div>
+                <h3 id="planMateria" class="text-lg font-semibold text-slate-800">Materia</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btnCrearDesdePlan" class="px-3 py-1.5 text-sm rounded-xl bg-brand-600 text-white hover:bg-brand-700">Crear recurso</button>
+                <button onclick="closePlan()" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Cerrar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M6.225 4.811a1 1 0 0 0-1.414 1.414L10.586 12l-5.775 5.775a1 1 0 0 0 1.414 1.414L12 13.414l5.775 5.775a1 1 0 0 0 1.414-1.414L13.414 12l5.775-5.775a1 1 0 0 0-1.414-1.414L12 10.586 6.225 4.811Z"/></svg>
+                </button>
+              </div>
+            </header>
+            <div id="planContent" class="p-4 overflow-y-auto thin-scrollbar grow"></div>
+          </aside>
+        </div>
+        <!-- ========== /PANEL PLAN ACADÉMICO ==========` -->
+      </section>
+    </main>
+  </div>
+
+  <!-- ========== SCRIPT: al final del body para evitar referencias antes de definir ==========` -->
+  <script>
+    // ======================= Internacionalización (i18n) =======================
+    const translations = {
+      es: {
+        panel_title: 'Panel del Docente',
+        badge_asistencia: 'Asistencia',
+        sb_docente: 'Docente',
+        sb_asistencia: 'Asistencia',
+        sb_materias: 'Materias',
+        sb_perfil: 'Perfil',
+        sb_supervisor: 'Supervisor',
+        sb_ajustes: 'Ajustes',
+        buscar_alumno: 'Buscar alumno...',
+        marcar_todos: 'Marcar todos como',
+        export_csv: 'Exportar CSV',
+        th_alumno: 'Alumno',
+        th_grupo: 'Grupo',
+        th_asistencia: 'Asistencia',
+        th_observacion: 'Observación',
+        th_acciones: 'Acciones',
+        perfil_title: 'Perfil de Alumno — Radar de Tendencias',
+        calificaciones_title: 'Calificaciones Parciales por Materia',
+        seguimiento_title: 'Seguimiento de Calificaciones (Primaria - Secundaria)'
+      },
+      en: {
+        panel_title: 'Teacher Panel',
+        badge_asistencia: 'Attendance',
+        sb_docente: 'Teacher',
+        sb_asistencia: 'Attendance',
+        sb_materias: 'Subjects',
+        sb_perfil: 'Profile',
+        sb_supervisor: 'Supervisor',
+        sb_ajustes: 'Settings',
+        buscar_alumno: 'Search student...',
+        marcar_todos: 'Mark all as',
+        export_csv: 'Export CSV',
+        th_alumno: 'Student',
+        th_grupo: 'Group',
+        th_asistencia: 'Attendance',
+        th_observacion: 'Observation',
+        th_acciones: 'Actions',
+        perfil_title: 'Student Profile — Trends Radar',
+        calificaciones_title: 'Partial Grades by Subject',
+        seguimiento_title: 'Grades Tracking (Primary - Secondary)'
+      }
+    };
+
+    function translatePage(lang){
+      const dict = translations[lang] || translations['es'];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key && dict[key]) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (key && dict[key]) el.placeholder = dict[key];
+      });
+    }
+
+    function setLanguage(lang){
+      localStorage.setItem('lang', lang);
+      translatePage(lang);
+      const sel = document.getElementById('langSelect'); if (sel) sel.value = lang;
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const saved = localStorage.getItem('lang') || 'es';
+      const sel = document.getElementById('langSelect');
+      if (sel){ sel.value = saved; sel.addEventListener('change', (e)=> setLanguage(e.target.value)); }
+      translatePage(saved);
+    });
+
+    // ======================= Datos demo (25 alumnos) =======================
+    const alumnos = [
+      { id: 1,  nombre: 'Ana Sofía Ramírez', grupo: '1°B', tel: '5218112345678', foto: 'https://randomuser.me/api/portraits/women/65.jpg' },
+      { id: 2,  nombre: 'Diego Hernández', grupo: '1°B', tel: '5218112341111', foto: 'https://randomuser.me/api/portraits/men/32.jpg' },
+      { id: 3,  nombre: 'Valeria Gómez', grupo: '1°B', tel: '5218112342222', foto: 'https://randomuser.me/api/portraits/women/44.jpg' },
+      { id: 4,  nombre: 'Luis Fernando Torres', grupo: '1°B', tel: '5218112343333', foto: 'https://randomuser.me/api/portraits/men/76.jpg' },
+      { id: 5,  nombre: 'Camila Rodríguez', grupo: '1°B', tel: '5218112344444', foto: 'https://randomuser.me/api/portraits/women/12.jpg' },
+      { id: 6,  nombre: 'Santiago Pérez', grupo: '1°B', tel: '5218112345555', foto: 'https://randomuser.me/api/portraits/men/12.jpg' },
+      { id: 7,  nombre: 'Regina Castillo', grupo: '1°B', tel: '5218112346666', foto: 'https://randomuser.me/api/portraits/women/21.jpg' },
+      { id: 8,  nombre: 'Emiliano Ruiz', grupo: '1°B', tel: '5218112347777', foto: 'https://randomuser.me/api/portraits/men/21.jpg' },
+      { id: 9,  nombre: 'María José Ortega', grupo: '1°B', tel: '5218112348888', foto: 'https://randomuser.me/api/portraits/women/31.jpg' },
+      { id: 10, nombre: 'Ian Morales', grupo: '1°B', tel: '5218112349999', foto: 'https://randomuser.me/api/portraits/men/31.jpg' },
+      { id: 11, nombre: 'Ximena Flores', grupo: '1°B', tel: '5218112300001', foto: 'https://randomuser.me/api/portraits/women/29.jpg' },
+      { id: 12, nombre: 'Leonardo Chávez', grupo: '1°B', tel: '5218112300002', foto: 'https://randomuser.me/api/portraits/men/29.jpg' },
+      { id: 13, nombre: 'Daniela Soto', grupo: '1°B', tel: '5218112300003', foto: 'https://randomuser.me/api/portraits/women/50.jpg' },
+      { id: 14, nombre: 'Gael Cano', grupo: '1°B', tel: '5218112300004', foto: 'https://randomuser.me/api/portraits/men/50.jpg' },
+      { id: 15, nombre: 'Paula Méndez', grupo: '1°B', tel: '5218112300005', foto: 'https://randomuser.me/api/portraits/women/68.jpg' },
+      { id: 16, nombre: 'Bruno Salinas', grupo: '1°B', tel: '5218112300006', foto: 'https://randomuser.me/api/portraits/men/68.jpg' },
+      { id: 17, nombre: 'Renata Navarro', grupo: '1°B', tel: '5218112300007', foto: 'https://randomuser.me/api/portraits/women/70.jpg' },
+      { id: 18, nombre: 'Carlos Medina', grupo: '1°B', tel: '5218112300008', foto: 'https://randomuser.me/api/portraits/men/70.jpg' },
+      { id: 19, nombre: 'Sofía Aguilar', grupo: '1°B', tel: '5218112300009', foto: 'https://randomuser.me/api/portraits/women/14.jpg' },
+      { id: 20, nombre: 'Rodrigo Báez', grupo: '1°B', tel: '5218112300010', foto: 'https://randomuser.me/api/portraits/men/14.jpg' },
+      { id: 21, nombre: 'Alexa Vela', grupo: '1°B', tel: '5218112300011', foto: 'https://randomuser.me/api/portraits/women/84.jpg' },
+      { id: 22, nombre: 'Pablo Ríos', grupo: '1°B', tel: '5218112300012', foto: 'https://randomuser.me/api/portraits/men/84.jpg' },
+      { id: 23, nombre: 'Victoria Leal', grupo: '1°B', tel: '5218112300013', foto: 'https://randomuser.me/api/portraits/women/1.jpg' },
+      { id: 24, nombre: 'Sebastián Luna', grupo: '1°B', tel: '5218112300014', foto: 'https://randomuser.me/api/portraits/men/1.jpg' },
+      { id: 25, nombre: 'Luisa Carrillo', grupo: '1°B', tel: '5218112300015', foto: 'https://randomuser.me/api/portraits/women/5.jpg' }
+    ];
+
+    // ======================= Render tabla =======================
+    const tbody = document.getElementById('tbodyAlumnos');
+    const presentesCnt = document.getElementById('presentesCnt');
+    const faltasCnt = document.getElementById('faltasCnt');
+    const retardosCnt = document.getElementById('retardosCnt');
+
+    function renderTabla(lista) {
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      lista.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.dataset.nombre = a.nombre.toLowerCase();
+        tr.innerHTML = `
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <img src="${a.foto}" alt="${a.nombre}" class="w-10 h-10 rounded-xl object-cover border"/>
+              <div>
+                <div class="font-medium text-slate-800">${a.nombre}</div>
+                <div class="text-xs text-slate-500">Tel.: ${a.tel}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-slate-600">${a.grupo}</td>
+          <td class="px-4 py-3">
+            <select class="asistenciaSel px-2 py-1.5 text-sm border rounded-lg">
+              <option value="Asistió">Asistió</option>
+              <option value="Falta">Falta</option>
+              <option value="Retardo">Retardo</option>
+              <option value="Justificada">Justificada</option>
+            </select>
+          </td>
+          <td class="px-4 py-3">
+            <input type="text" class="obsInp w-full px-3 py-2 text-sm border rounded-lg" placeholder="Observación (opcional)"/>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <button class="btnWa px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700">WhatsApp</button>
+              <button class="btnMail px-3 py-1.5 text-xs rounded-lg bg-brand-600 text-white hover:bg-brand-700">Correo Supervisor</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      actualizarResumen();
+      renderListaRapida(lista);
+    }
+
+    // ======================= Materias Docente =======================
+    const materiasDocente = [
+      { nombre: 'Matemáticas', grupos: ['1°B'] },
+      { nombre: 'Español', grupos: ['1°A'] },
+      { nombre: 'Ciencias', grupos: ['1°B'] },
+      { nombre: 'Historia', grupos: ['1°C'] },
+      { nombre: 'Inglés', grupos: ['1°B'] },
+    ];
+
+    const materiasGrid = () => {
+      const grid = document.getElementById('materiasGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      materiasDocente.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-2xl p-3 hover:shadow-sm transition bg-white';
+        card.innerHTML = `
+          <div class="text-slate-800 font-medium">${m.nombre}</div>
+          <div class="text-xs text-slate-500 mb-3">Grupos: ${m.grupos.join(', ')}</div>
+          <button class="px-3 py-1.5 text-sm rounded-xl bg-brand-600 text-white hover:bg-brand-700">Gestionar</button>
+        `;
+        card.querySelector('button').addEventListener('click', () => abrirModal(m.nombre));
+        grid.appendChild(card);
+      });
+    };
+
+    // ======================= Planes académicos (demo) =======================
+    const planes = {
+      'Matemáticas': {
+        descripcion: 'Eje: Álgebra y pensamiento matemático. Evaluación continua con rúbrica y exámenes parciales.',
+        competencias: ['Resuelve problemas de álgebra básica','Modela con ecuaciones lineales','Interpreta porcentajes y razones'],
+        recursos: ['Libro: Álgebra Baldor (selección)','Khan Academy Álgebra I','GeoGebra'],
+        calendario: [
+          { semana: '1-3', foco: 'Álgebra básica' },
+          { semana: '4-6', foco: 'Ecuaciones lineales' },
+          { semana: '7-8', foco: 'Porcentajes y razones' }
+        ],
+        unidades: [
+          { titulo: 'Present Simple', semanas: '1-3', temas: ['Affirmative/Negative/Questions','Adverbs of frecuencia'], evidencias: ['Quiz #1','Role-play'] },
+          { titulo: 'Daily Routines & Time', semanas: '4-6', temas: ['Routines','Telling the time','Prepositions of time'], evidencias: ['Poster digital','Speaking check'] },
+          { titulo: 'Food & Ordering', semanas: '7-8', temas: ['Count/Non-count','Ordering food','Polite requests'], evidencias: ['Dialogo grabado','Vocab test'] }
+        ]
+      }
+    };
+
+    function renderPlanHTML(plan){
+      if (!plan) return '<p class="text-sm text-slate-500">Sin plan disponible.</p>';
+      const header = `
+        <p class="text-sm text-slate-600 mb-3">${plan.descripcion}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div class="border rounded-xl p-3"><div class="text-xs text-slate-500 mb-1">Competencias</div><ul class="text-sm list-disc ml-4 space-y-1">${plan.competencias.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+          <div class="border rounded-xl p-3"><div class="text-xs text-slate-500 mb-1">Recursos</div><ul class="text-sm list-disc ml-4 space-y-1">${plan.recursos.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+          <div class="border rounded-xl p-3"><div class="text-xs text-slate-500 mb-1">Calendario</div><ul class="text-sm space-y-1">${plan.calendario.map(c=>`<li class='flex items-center justify-between'><span>Sem. ${c.semana}</span><span class='text-slate-600'>${c.foco}</span></li>`).join('')}</ul></div>
+        </div>`;
+      const unidades = plan.unidades.map((u,idx)=>`
+        <details class="border rounded-xl p-3 mb-2" ${idx===0?'open':''}>
+          <summary class="cursor-pointer select-none font-medium text-slate-800 flex items-center justify-between">
+            <span>${u.titulo} <span class="ml-2 text-xs text-slate-500">Semanas ${u.semanas}</span></span>
+            <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">${u.temas.length} temas</span>
+          </summary>
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <div class="text-xs text-slate-500 mb-1">Temas</div>
+              <ul class="text-sm list-disc ml-4 space-y-1">${u.temas.map(t=>`<li>${t}</li>`).join('')}</ul>
+            </div>
+            <div>
+              <div class="text-xs text-slate-500 mb-1">Evidencias / Evaluación</div>
+              <ul class="text-sm list-disc ml-4 space-y-1">${u.evidencias.map(e=>`<li>${e}</li>`).join('')}</ul>
+            </div>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button class="px-3 py-1.5 text-xs rounded-xl border hover:bg-slate-50" onclick="abrirModal(document.getElementById('planMateria').textContent); preseleccionarTipo('Actividad');">Crear actividad</button>
+            <button class="px-3 py-1.5 text-xs rounded-xl border hover:bg-slate-50" onclick="abrirModal(document.getElementById('planMateria').textContent); preseleccionarTipo('Examen');">Crear examen</button>
+          </div>
+        </details>
+      `).join('');
+      return header + unidades;
+    }
+
+    function openPlan(materia){
+      const panel = document.getElementById('planPanel');
+      const title = document.getElementById('planMateria');
+      const content = document.getElementById('planContent');
+      if (!panel || !content) return;
+      const plan = planes[materia];
+      title.textContent = materia;
+      content.innerHTML = renderPlanHTML(plan);
+      panel.classList.remove('hidden');
+      const btn = document.getElementById('btnCrearDesdePlan');
+      if (btn){ btn.onclick = () => { closePlan(); abrirModal(materia); preseleccionarTipo('Actividad'); }; }
+    }
+
+    function closePlan(){ const panel = document.getElementById('planPanel'); if (panel) panel.classList.add('hidden'); }
+
+    function bindPlanButtons(){
+      document.querySelectorAll('#materiasWrap article').forEach(art => {
+        const materia = art.querySelector('h3')?.textContent?.trim();
+        const btn = Array.from(art.querySelectorAll('button')).find(b => b.textContent.trim().toLowerCase().includes('ver planeación'));
+        if (btn && materia){ btn.onclick = () => openPlan(materia); }
+      });
+    }
+
+    function preseleccionarTipo(tipo){
+      const input = document.getElementById('tipoSeleccionado');
+      if (input){ input.value = tipo; }
+    }
+
+    // ======================= Utilidades =======================
+    function renderListaRapida(lista){
+      const ul = document.getElementById('listaRapida');
+      const count = document.getElementById('alumnosCount');
+      if (!ul) return;
+      ul.innerHTML = '';
+      lista.forEach(a => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <button class="flex items-center gap-2 px-2 py-1 border rounded-xl hover:bg-slate-50 text-xs" title="Filtrar: ${a.nombre}">
+            <img src="${a.foto}" class="w-6 h-6 rounded-lg object-cover border" alt="${a.nombre}">
+            <span class="whitespace-nowrap">${a.nombre}</span>
+          </button>`;
+        li.querySelector('button').addEventListener('click', () => {
+          const inp = document.getElementById('buscarInput');
+          if (inp){ inp.value = a.nombre; inp.dispatchEvent(new Event('input')); }
+          document.getElementById('tablaAsistencia').scrollIntoView({behavior:'smooth'});
+        });
+        ul.appendChild(li);
+      });
+      if (count){ count.textContent = `${lista.length} alumnos`; }
+    }
+
+    function encodeQuery(q) { return encodeURIComponent(q); }
+    function todayMX() {
+      const d = new Date();
+      return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    function actualizarResumen() {
+      const rows = [...document.querySelectorAll('#tbodyAlumnos tr')];
+      let p = 0, f = 0, r = 0;
+      rows.forEach(row => {
+        const sel = row.querySelector('.asistenciaSel');
+        if (!sel) return;
+        if (sel.value === 'Asistió') p++;
+        else if (sel.value === 'Falta') f++;
+        else if (sel.value === 'Retardo') r++;
+      });
+      if (presentesCnt) presentesCnt.textContent = p;
+      if (faltasCnt) faltasCnt.textContent = f;
+      if (retardosCnt) retardosCnt.textContent = r;
+    }
+
+    // ======================= Modal Crear (lógica) =======================
+    let materiaSeleccionada = null;
+    function abrirModal(materia) {
+      materiaSeleccionada = materia;
+      document.getElementById('modalMateria').textContent = materia;
+      document.getElementById('modalCrear').classList.remove('hidden');
+      document.getElementById('tipoSeleccionado').value = '';
+      document.getElementById('tituloInp').value = '';
+      document.getElementById('fechaInp').value = new Date().toISOString().slice(0,10);
+      document.getElementById('pondInp').value = 10;
+      document.getElementById('promptIA').value = '';
+      document.getElementById('wrapIA').classList.add('hidden');
+    }
+    function cerrarModal(){ document.getElementById('modalCrear').classList.add('hidden'); }
+
+    document.addEventListener('click', (e) => {
+      const tipoBtn = e.target.closest('.tipoBtn');
+      if (tipoBtn) {
+        document.getElementById('tipoSeleccionado').value = tipoBtn.dataset.tipo;
+        document.querySelectorAll('.tipoBtn').forEach(b => b.classList.remove('ring-2','ring-brand-400'));
+        tipoBtn.classList.add('ring-2','ring-brand-400');
+        if (tipoBtn.dataset.tipo === 'Examen IA') document.getElementById('wrapIA').classList.remove('hidden');
+        else document.getElementById('wrapIA').classList.add('hidden');
+      }
+    });
+
+    document.getElementById('formCrear').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const tipo = document.getElementById('tipoSeleccionado').value || 'Actividad';
+      const titulo = document.getElementById('tituloInp').value.trim() || `${tipo} de ${materiaSeleccionada}`;
+      const fecha = document.getElementById('fechaInp').value;
+      const pond = document.getElementById('pondInp').value;
+      const prompt = document.getElementById('promptIA').value.trim();
+
+      const li = document.createElement('li');
+      li.className = 'py-3 px-2 flex items-start justify-between';
+      li.innerHTML = `
+        <div>
+          <div class="font-medium text-slate-800">${titulo} <span class="ml-2 text-xs px-2 py-0.5 rounded-full ${badgeClass(tipo)}">${tipo}</span></div>
+          <div class="text-xs text-slate-500">Materia: ${materiaSeleccionada} · Entrega: ${fecha} · Ponderación: ${pond}%</div>
+          ${tipo === 'Examen IA' && prompt ? `<div class=\"text-xs text-slate-400 mt-1\">IA: ${escapeHtml(prompt).slice(0,120)}...</div>` : ''}
+        </div>
+        <button class="px-2 py-1 text-xs rounded-lg border hover:bg-slate-50">Ver</button>
+      `;
+      document.getElementById('bandejaLista').prepend(li);
+      cerrarModal();
+    });
+
+    function badgeClass(tipo){
+      switch(tipo){
+        case 'Examen': return 'bg-slate-100 text-slate-700';
+        case 'Actividad': return 'bg-emerald-100 text-emerald-700';
+        case 'Tarea': return 'bg-amber-100 text-amber-700';
+        case 'Quiz': return 'bg-purple-100 text-purple-700';
+        case 'Examen IA': return 'bg-brand-100 text-brand-700';
+        default: return 'bg-slate-100 text-slate-700';
+      }
+    }
+
+    function escapeHtml(str){
+      return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    }
+
+    // ======================= Eventos UI =======================
+    document.getElementById('marcarTodos').addEventListener('change', (e) => {
+      const val = e.target.value;
+      document.querySelectorAll('.asistenciaSel').forEach(sel => { if (val) sel.value = val; });
+      actualizarResumen();
+    });
+
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('asistenciaSel')) actualizarResumen();
+    });
+
+    // Búsqueda
+    const buscarInput = document.getElementById('buscarInput');
+    const limpiarBtn = document.getElementById('limpiarBtn');
+    buscarInput.addEventListener('input', () => {
+      const q = buscarInput.value.toLowerCase().trim();
+      document.querySelectorAll('#tbodyAlumnos tr').forEach(tr => {
+        const ok = tr.dataset.nombre.includes(q);
+        tr.style.display = ok ? '' : 'none';
+      });
+    });
+    limpiarBtn.addEventListener('click', () => { buscarInput.value = ''; buscarInput.dispatchEvent(new Event('input')); });
+
+    // WhatsApp + Correo por fila
+    document.addEventListener('click', (e) => {
+      const btnWa = e.target.closest('.btnWa');
+      const btnMail = e.target.closest('.btnMail');
+      if (btnWa || btnMail) {
+        const row = e.target.closest('tr');
+        const nombre = row.querySelector('.font-medium').textContent;
+        const telTxt = row.querySelector('td:nth-child(1) .text-xs').textContent.replace('Tel.: ', '');
+        const estado = row.querySelector('.asistenciaSel').value;
+        const obs = row.querySelector('.obsInp').value || 'Sin observación';
+        const fecha = todayMX();
+        const materia = 'Matemáticas';
+        const grupo = row.children[1].textContent.trim();
+
+        const msg = `Aviso de asistencia\nEstudiante: ${nombre}\nGrupo: ${grupo}\nMateria: ${materia}\nFecha: ${fecha}\nEstatus: ${estado}\nObservación: ${obs}`;
+
+        if (btnWa) {
+          const numero = telTxt.replace(/\D/g, '');
+          const url = `https://wa.me/${numero}?text=${encodeQuery(msg)}`;
+          window.open(url, '_blank');
+        }
+        if (btnMail) {
+          const supervisor = 'supervisor@colegio.edu.mx';
+          const subject = encodeQuery(`[Asistencia ${materia}] ${nombre} · ${estado}`);
+          const body = encodeQuery(msg);
+          const mailto = `mailto:${supervisor}?subject=${subject}&body=${body}`;
+          window.location.href = mailto;
+        }
+      }
+    });
+
+    // Export CSV básico
+    document.getElementById('exportCsv').addEventListener('click', () => {
+      const rows = [['Nombre', 'Grupo', 'Estatus', 'Observación']];
+      document.querySelectorAll('#tbodyAlumnos tr').forEach(tr => {
+        if (tr.style.display === 'none') return; // respeta filtro
+        const nombre = tr.querySelector('.font-medium').textContent;
+        const grupo = tr.children[1].textContent.trim();
+        const estado = tr.querySelector('.asistenciaSel').value;
+        const obs = tr.querySelector('.obsInp').value || '';
+        rows.push([nombre, grupo, estado, obs]);
+      });
+      const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `asistencia_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Foto del día preview
+    document.getElementById('fotoDia').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('imgFoto').src = ev.target.result;
+        document.getElementById('previewFoto').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ======================= Vistas y Menú =======================
+    function setVista(v){
+      const asis = document.getElementById('asistenciaWrap');
+      const mats = document.getElementById('materiasWrap');
+      const perfil = document.getElementById('perfilAlumno');
+      const badge = document.getElementById('badgeVista');
+      if (!asis || !mats || !perfil || !badge) return;
+
+      if (v === 'materias'){
+        asis.classList.add('hidden');
+        mats.classList.remove('hidden');
+        perfil.classList.add('hidden');
+        badge.textContent = 'Materias';
+        bindPlanButtons();
+      } else if (v === 'perfil'){
+        asis.classList.add('hidden');
+        mats.classList.add('hidden');
+        perfil.classList.remove('hidden');
+        badge.textContent = 'Perfil Alumno';
+        perfil.scrollIntoView({behavior:'smooth'});
+        // Inicializar gráfico radar
+        setTimeout(() => initRadarChart(), 100);
+        // Inicializar gráfico de seguimiento
+        setTimeout(() => initSeguimientoChart(), 150);
+      } else { // asistencia
+        asis.classList.remove('hidden');
+        mats.classList.add('hidden');
+        perfil.classList.add('hidden');
+        badge.textContent = 'Asistencia';
+        const _b = document.getElementById('buscarInput');
+        if (_b){ _b.value=''; _b.dispatchEvent(new Event('input')); }
+        renderTabla(alumnos);
+      }
+      setMenuActive(v);
+      // location.hash = '#' + v; // activar si quieres persistir la vista en URL
+    }
+
+    function setMenuActive(v){
+      const map = {
+        asistencia: document.getElementById('btnAsistencia'),
+        materias: document.getElementById('btnMaterias'),
+        perfil: document.getElementById('btnPerfil')
+      };
+      Object.keys(map).forEach(key => {
+        const btn = map[key];
+        if (!btn) return;
+        const isActive = key === v;
+        btn.classList.toggle('text-brand-700', isActive);
+        btn.classList.toggle('bg-brand-50', isActive);
+        btn.classList.toggle('rounded-xl', true);
+        const icon = btn.querySelector('svg');
+        if (icon){ icon.classList.toggle('text-brand-700', isActive); }
+        const label = btn.querySelector('span');
+        if (label){ label.classList.toggle('text-brand-700', isActive); }
+      });
+    }
+
+    // ======================= Pruebas rápidas (smoke tests) =======================
+    function initRadarChart(){
+      const ctx = document.getElementById('radarAlumno');
+      if (!ctx) return;
+      // Destruir gráfico anterior si existe
+      if (window.radarChartInstance) {
+        window.radarChartInstance.destroy();
+      }
+      // Crear nuevo gráfico
+      window.radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Matemáticas', 'Razonamiento', 'Sensorial', 'Comunicación', 'Creatividad'],
+          datasets: [{
+            label: 'Tendencias',
+            data: [8, 7, 5, 4, 6],
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+            pointBorderColor: '#fff',
+            pointRadius: 5,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(100, 116, 139, 0.3)' },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              pointLabels: { 
+                color: '#cbd5e1', 
+                font: { size: 14, weight: '500' },
+                padding: 10
+              },
+              min: 0,
+              max: 10,
+              ticks: { 
+                color: '#94a3b8', 
+                stepSize: 2,
+                backdropColor: 'rgba(15, 23, 42, 0.8)'
+              }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleColor: '#f1f5f9',
+              bodyColor: '#cbd5e1',
+              borderColor: 'rgba(59, 130, 246, 0.5)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: false
+            }
+          }
+        }
+      });
+    }
+
+    function initSeguimientoChart(){
+      const ctx = document.getElementById('chartSeguimientoCalificaciones');
+      if (!ctx) return;
+      // Destruir gráfico anterior si existe
+      if (window.seguimientoChartInstance) {
+        window.seguimientoChartInstance.destroy();
+      }
+      // Crear nuevo gráfico de línea/barras
+      window.seguimientoChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1° Prim.', '2° Prim.', '3° Prim.', '4° Prim.', '5° Prim.', '6° Prim.', '1° Sec.', '2° Sec.', '3° Sec.'],
+          datasets: [
+            {
+              label: 'Promedio General',
+              data: [7.2, 7.8, 8.1, 8.5, 8.3, 8.7, 8.4, 8.6, 8.6],
+              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              pointBackgroundColor: 'rgb(59, 130, 246)',
+              pointBorderColor: '#fff',
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              tension: 0.4,
+              fill: true,
+              borderWidth: 3
+            },
+            {
+              label: 'Meta (9.0)',
+              data: [9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0],
+              borderColor: 'rgba(34, 197, 94, 0.5)',
+              borderDash: [5, 5],
+              pointRadius: 0,
+              tension: 0,
+              fill: false,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            y: {
+              min: 6,
+              max: 10,
+              ticks: {
+                stepSize: 0.5,
+                color: '#64748b',
+                font: { size: 12 }
+              },
+              grid: {
+                color: 'rgba(148, 163, 184, 0.1)',
+                drawBorder: true
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { size: 11 } }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#64748b',
+                font: { size: 12, weight: '500' },
+                padding: 15,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleColor: '#f1f5f9',
+              bodyColor: '#cbd5e1',
+              borderColor: 'rgba(59, 130, 246, 0.5)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                afterLabel: function(context) {
+                  if (context.label === 'Promedio General') {
+                    return 'Año: ' + ['1° Primaria', '2° Primaria', '3° Primaria', '4° Primaria', '5° Primaria', '6° Primaria', '1° Secundaria', '2° Secundaria', '3° Secundaria'][context.dataIndex];
+                  }
+                  return '';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function runSmokeTests(){
+      try {
+        console.assert(typeof setVista === 'function', 'setVista debe estar definida');
+        console.assert(typeof openPlan === 'function', 'openPlan debe estar definida');
+        console.assert(document.getElementById('tbodyAlumnos'), '#tbodyAlumnos existe');
+        console.assert(document.getElementById('materiasGrid'), '#materiasGrid existe');
+        console.assert(document.getElementById('bandejaLista'), '#bandejaLista existe');
+        console.assert(document.getElementById('modalCrear'), '#modalCrear existe');
+        // test extra: render tabla y conteo
+        renderTabla(alumnos);
+        console.assert(document.querySelectorAll('#tbodyAlumnos tr').length === 25, 'Debe renderizar 25 alumnos');
+        // test plan
+        openPlan('Matemáticas');
+        console.assert(!document.getElementById('planPanel').classList.contains('hidden'), 'planPanel visible');
+        console.assert(document.getElementById('planMateria').textContent === 'Matemáticas', 'Título del plan correcto');
+        closePlan();
+        console.log('Smoke tests OK');
+      } catch (err) {
+        console.error('Smoke tests fallaron', err);
+      }
+    }
+
+    // ======================= Inicialización =======================
+    window.addEventListener('load', () => {
+      materiasGrid();
+      bindPlanButtons();
+      document.getElementById('fechaSpan').textContent = todayMX();
+      renderTabla(alumnos);
+      setVista('asistencia');
+      runSmokeTests();
+    });
+  </script>
+</body>
+</html>
