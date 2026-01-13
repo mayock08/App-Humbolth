@@ -1,0 +1,29 @@
+{
+  "name": "humbolth-backend",
+  "version": "1.0.0",
+  "description": "Backend API para la gestión de materias y su integración con n8n.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "lint": "npx eslint .",
+    "test": "echo \"No hay pruebas configuradas\""
+  },
+  "keywords": [
+    "materias",
+    "n8n",
+    "backend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
