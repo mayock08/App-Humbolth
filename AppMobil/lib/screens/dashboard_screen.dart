@@ -8,6 +8,7 @@ import 'activities_screen.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
+import 'grades_screen.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -149,7 +150,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   title: 'Grades',
                   color: AppTheme.accentBlue,
                   onTap: () {
-                    // TODO: Navigate to Grades screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GradesScreen()),
+                    );
                   },
                 ),
                 const SizedBox(height: 12),

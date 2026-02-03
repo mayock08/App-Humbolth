@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, X, Pencil, Trash2, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SubjectManagement = () => {
+    const navigate = useNavigate();
     const [subjects, setSubjects] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [grades, setGrades] = useState([]);

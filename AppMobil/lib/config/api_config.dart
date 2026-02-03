@@ -7,6 +7,8 @@ class ApiConfig {
   static const String studentProfile = '$baseUrl/StudentProfile';
   static const String courses = '$baseUrl/Courses';
   static const String activities = '$baseUrl/Activities';
+  static const String studentActivities = '$baseUrl/Activities/student';
+  static const String studentAttendance = '$baseUrl/Attendances/student';
   
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);

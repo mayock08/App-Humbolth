@@ -90,4 +90,57 @@ class ApiService {
       rethrow;
     }
   }
+
+  // New methods for Student Activities and Attendance
+
+  Future<List<dynamic>> getStudentActivities(String studentId) async {
+    try {
+      final response = await get(
+        '${ApiConfig.studentActivities}/$studentId',
+        includeAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load activities: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> getStudentAttendance(String studentId) async {
+    try {
+      final response = await get(
+        '${ApiConfig.studentAttendance}/$studentId',
+        includeAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load attendance: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getStudentProfile(String studentId) async {
+    try {
+      final response = await get(
+        '${ApiConfig.studentProfile}/$studentId',
+        includeAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

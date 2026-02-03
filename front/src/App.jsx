@@ -5,10 +5,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/auth/Login';
 
 // Admin
+import AdministratorLayout from './layouts/AdministratorLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ClassGrouping from './pages/admin/ClassGrouping';
+import ScheduleBuilder from './pages/admin/ScheduleBuilder';
 import Settings from './pages/admin/Settings';
 import AddStudent from './pages/admin/AddStudent';
 import SubjectManagement from './pages/admin/SubjectManagement';
+import SubjectProfile from './pages/admin/SubjectProfile';
+import FinanceDashboard from './pages/admin/FinanceDashboard';
+import MobileAccess from './pages/admin/MobileAccess';
 
 // Teacher
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
@@ -37,10 +43,15 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Admin */}
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
-        <Route path="/add-student" element={<DashboardLayout><AddStudent /></DashboardLayout>} />
-        <Route path="/subjects" element={<DashboardLayout><SubjectManagement /></DashboardLayout>} />
+        <Route path="/dashboard" element={<AdministratorLayout><AdminDashboard /></AdministratorLayout>} />
+        <Route path="/class-grouping" element={<AdministratorLayout><ClassGrouping /></AdministratorLayout>} />
+        <Route path="/schedule" element={<AdministratorLayout><ScheduleBuilder /></AdministratorLayout>} />
+        <Route path="/settings" element={<AdministratorLayout><Settings /></AdministratorLayout>} />
+        <Route path="/add-student" element={<AdministratorLayout><AddStudent /></AdministratorLayout>} />
+        <Route path="/subjects" element={<AdministratorLayout><SubjectManagement /></AdministratorLayout>} />
+        <Route path="/subjects/new" element={<AdministratorLayout><SubjectProfile /></AdministratorLayout>} />
+        <Route path="/finance" element={<AdministratorLayout><FinanceDashboard /></AdministratorLayout>} />
+        <Route path="/mobile-access" element={<AdministratorLayout><MobileAccess /></AdministratorLayout>} />
 
         {/* Teacher */}
         <Route path="/teacher-panel" element={<TeacherLayout><TeacherDashboard /></TeacherLayout>} />

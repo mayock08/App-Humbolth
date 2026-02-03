@@ -101,6 +101,18 @@ namespace Backend.API.Controllers
             return NoContent();
         }
 
+        // GET: api/Activities/student/5
+        [HttpGet("student/{studentId}")]
+        public async Task<ActionResult<IEnumerable<StudentActivity>>> GetStudentActivities(long studentId)
+        {
+            return await _context.StudentActivities
+                .Include(sa => sa.Activity)
+                .Include(sa => sa.Activity.Teacher)
+                .Where(sa => sa.StudentId == studentId)
+                .OrderByDescending(sa => sa.AssignedAt)
+                .ToListAsync();
+        }
+
         private bool ActivityExists(long id)
         {
             return _context.Activities.Any(e => e.Id == id);
