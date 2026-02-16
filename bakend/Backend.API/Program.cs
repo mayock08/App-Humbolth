@@ -61,10 +61,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Register Services
+builder.Services.AddScoped<Backend.API.Services.IDebtService, Backend.API.Services.MockDebtService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.
+var swaggerEnabled = app.Configuration.GetValue<bool>("Swagger:Enabled");
+if (app.Environment.IsDevelopment() || swaggerEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI();

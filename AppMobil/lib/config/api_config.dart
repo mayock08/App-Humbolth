@@ -1,6 +1,6 @@
 class ApiConfig {
   // Base URL del backend .NET
-  static const String baseUrl = 'http://localhost:5246/api';
+  static const String baseUrl = 'http://institutohumboldt.mx:8080/api';
   
   // Endpoints
   static const String authLogin = '$baseUrl/Auth/login';
@@ -9,6 +9,8 @@ class ApiConfig {
   static const String activities = '$baseUrl/Activities';
   static const String studentActivities = '$baseUrl/Activities/student';
   static const String studentAttendance = '$baseUrl/Attendances/student';
+  static const String studentNotifications = '$baseUrl/Notifications/student';
+  static const String studentIncidents = '$baseUrl/Incidents/student';
   
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);

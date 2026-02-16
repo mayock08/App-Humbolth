@@ -297,11 +297,12 @@ CREATE INDEX IF NOT EXISTS idx_enrollments_course
 CREATE TABLE IF NOT EXISTS public.attendances (
     id          BIGSERIAL PRIMARY KEY,
     student_id  BIGINT      NOT NULL,
-    course_id   BIGINT      NOT NULL,
+    course_id   INT REFERENCES public.courses(id),
     class_date  DATE        NOT NULL,
-    status      CHAR(1)     NOT NULL, -- P = Presente, A = Ausente, R = Retardo
+    status      VARCHAR(50) NOT NULL, -- 'Asistió', 'Falta', 'Retardo', 'Justificada'
+    emotion     VARCHAR(50), -- 'Feliz', 'Neutral', 'Triste', 'Enojado', 'Ansioso'
     note        TEXT,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_att_student
         FOREIGN KEY (student_id)
         REFERENCES public.students(id)

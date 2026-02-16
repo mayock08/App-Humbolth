@@ -27,7 +27,7 @@ const SubjectManagement = () => {
     const fetchSubjects = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5246/api/Courses');
+            const response = await fetch('http://institutohumboldt.mx:8080/api/Courses');
             if (response.ok) {
                 const data = await response.json();
                 setSubjects(data);
@@ -44,7 +44,7 @@ const SubjectManagement = () => {
 
     const fetchTeachers = async () => {
         try {
-            const response = await fetch('http://localhost:5246/api/Teachers');
+            const response = await fetch('http://institutohumboldt.mx:8080/api/Teachers');
             if (response.ok) {
                 const data = await response.json();
                 setTeachers(data);
@@ -56,7 +56,7 @@ const SubjectManagement = () => {
 
     const fetchGrades = async () => {
         try {
-            const response = await fetch('http://localhost:5246/api/SchoolLevels');
+            const response = await fetch('http://institutohumboldt.mx:8080/api/SchoolLevels');
             if (response.ok) {
                 const data = await response.json();
                 // Flatten all grades from all levels
@@ -125,8 +125,8 @@ const SubjectManagement = () => {
             };
 
             const url = editingSubject
-                ? `http://localhost:5246/api/Courses/${editingSubject.id}`
-                : 'http://localhost:5246/api/Courses';
+                ? `http://institutohumboldt.mx:8080/api/Courses/${editingSubject.id}`
+                : 'http://institutohumboldt.mx:8080/api/Courses';
 
             const method = editingSubject ? 'PUT' : 'POST';
 
@@ -152,7 +152,7 @@ const SubjectManagement = () => {
         if (!window.confirm('¿Está seguro de eliminar esta materia?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5246/api/Courses/${id}`, {
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/Courses/${id}`, {
                 method: 'DELETE'
             });
 

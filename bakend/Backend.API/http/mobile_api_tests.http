@@ -1,0 +1,70 @@
+@host = http://localhost:5246
+
+### 1. Create a Test Notification
+POST {{host}}/api/Notifications
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "title": "Bienvenido al sistema",
+  "message": "Esta es una notificación de prueba para verificar la integración móvil.",
+  "type": "General"
+}
+
+### 2. Get Notifications for Student 1
+GET {{host}}/api/Notifications/student/1
+Accept: application/json
+
+### 3. Mark Notification as Read (Replace ID with one from previous step)
+PUT {{host}}/api/Notifications/1/read
+
+### 4. Create a Test Incident (Reporte)
+POST {{host}}/api/Incidents
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "title": "Reporte de conducta",
+  "description": "El alumno mostró una actitud positiva en clase.",
+  "typeId": 1,
+  "reporterId": 1,
+  "status": "Abierto"
+}
+
+
+### 6. Create Test Activities (Tasks Module)
+# Homework
+POST {{host}}/api/Activities
+Content-Type: application/json
+
+{
+  "title": "Tarea de Matemáticas",
+  "description": "Resolver ejercicios pág. 45",
+  "activityType": "HOMEWORK",
+  "teacherId": 1,
+  "isPublished": true
+}
+
+# Project
+POST {{host}}/api/Activities
+Content-Type: application/json
+
+{
+  "title": "Proyecto de Ciencias",
+  "description": "Volcán",
+  "activityType": "PROJECT",
+  "teacherId": 1,
+  "isPublished": true
+}
+
+# Exam
+POST {{host}}/api/Activities
+Content-Type: application/json
+
+{
+  "title": "Examen Parcial 1",
+  "description": "Unidad 1 y 2",
+  "activityType": "PARTIAL",
+  "teacherId": 1,
+  "isPublished": true
+}

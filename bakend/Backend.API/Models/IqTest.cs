@@ -132,6 +132,9 @@ namespace Backend.API.Models
         [Column("text")]
         public string Text { get; set; } = string.Empty;
 
+        [Column("image_url")]
+        public string? ImageUrl { get; set; }
+
         [Column("is_correct")]
         public bool IsCorrect { get; set; } = false;
 

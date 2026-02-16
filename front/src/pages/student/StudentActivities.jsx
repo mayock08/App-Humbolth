@@ -17,7 +17,7 @@ const StudentActivities = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:5246/api/StudentProfile/${userId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data.courses || []);

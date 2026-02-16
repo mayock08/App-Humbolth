@@ -15,7 +15,7 @@ const StudentCourses = () => {
 
     const fetchStudentCourses = async () => {
         try {
-            const response = await fetch(`http://localhost:5246/api/StudentProfile/${userId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data.courses || []);
@@ -29,7 +29,7 @@ const StudentCourses = () => {
 
     const fetchCourseActivities = async (courseId) => {
         try {
-            const response = await fetch(`http://localhost:5246/api/Activities?courseId=${courseId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/Activities?courseId=${courseId}`);
             if (response.ok) {
                 const data = await response.json();
                 setActivities(data);

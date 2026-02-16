@@ -10,6 +10,7 @@ const AddStudent = () => {
 
     // Form state
     const [formData, setFormData] = useState({
+        matricula: '',
         firstName: '',
         paternalSurname: '',
         maternalSurname: '',
@@ -48,7 +49,7 @@ const AddStudent = () => {
 
     const fetchLevels = async () => {
         try {
-            const response = await fetch('http://localhost:5246/api/SchoolLevels');
+            const response = await fetch('http://institutohumboldt.mx:8080/api/SchoolLevels');
             if (response.ok) {
                 const data = await response.json();
                 setLevels(data);
@@ -60,7 +61,7 @@ const AddStudent = () => {
 
     const fetchFamilies = async () => {
         try {
-            const response = await fetch('http://localhost:5246/api/Families');
+            const response = await fetch('http://institutohumboldt.mx:8080/api/Families');
             if (response.ok) {
                 const data = await response.json();
                 setFamilies(data);
@@ -105,7 +106,7 @@ const AddStudent = () => {
             let familyId = formData.familyId;
 
             if (formData.familyOption === 'new') {
-                const familyResponse = await fetch('http://localhost:5246/api/Families', {
+                const familyResponse = await fetch('http://institutohumboldt.mx:8080/api/Families', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -120,6 +121,7 @@ const AddStudent = () => {
             }
 
             const studentPayload = {
+                matricula: formData.matricula,
                 firstName: formData.firstName,
                 paternalSurname: formData.paternalSurname,
                 maternalSurname: formData.maternalSurname,
@@ -140,7 +142,7 @@ const AddStudent = () => {
                 status: formData.status
             };
 
-            const studentResponse = await fetch('http://localhost:5246/api/Students', {
+            const studentResponse = await fetch('http://institutohumboldt.mx:8080/api/Students', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(studentPayload)
@@ -233,6 +235,7 @@ const AddStudent = () => {
                         <h2 className="text-sm font-semibold text-gray-900">Datos Básicos</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <InputField label="Matrícula" name="matricula" placeholder="Opcional" />
                         <InputField label="Nombre(s)" name="firstName" required />
                         <InputField label="Apellido Paterno" name="paternalSurname" required />
                         <InputField label="Apellido Materno" name="maternalSurname" />

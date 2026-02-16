@@ -1,0 +1,29 @@
+@host = http://localhost:5038
+
+### 1. Login as Parent (Guardian) - Success (Default Password)
+# Prerequisite: Ensure at least one guardian exists in the DB with Email or MobilePhone and password_hash = 'parent123'
+POST {{host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "juan.perez@example.com", 
+  "password": "parent123"
+}
+
+### 2. Login as Parent - Success (Mobile Phone)
+POST {{host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "5551234567", 
+  "password": "parent123"
+}
+
+### 3. Login as Parent - Failure (Wrong Password)
+POST {{host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "juan.perez@example.com", 
+  "password": "wrongpassword"
+}

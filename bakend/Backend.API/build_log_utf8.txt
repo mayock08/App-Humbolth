@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AuthController.cs(173,23): warning CS8618: Non-nullable property 'Username' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AuthController.cs(174,23): warning CS8618: Non-nullable property 'Password' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\CoordinatorsController.cs(34,37): error CS1061: 'ICollection<CoordinatorGroup>' does not contain a definition for 'Group' and no accessible extension method 'Group' accepting a first argument of type 'ICollection<CoordinatorGroup>' could be found (are you missing a using directive or an assembly reference?) [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentsController.cs(26,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AdminDashboardController.cs(36,35): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentProfileController.cs(26,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentProfileController.cs(116,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+
+Build FAILED.
+
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AuthController.cs(173,23): warning CS8618: Non-nullable property 'Username' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AuthController.cs(174,23): warning CS8618: Non-nullable property 'Password' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentsController.cs(26,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\AdminDashboardController.cs(36,35): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentProfileController.cs(26,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\StudentProfileController.cs(116,39): warning CS8602: Dereference of a possibly null reference. [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Controllers\CoordinatorsController.cs(34,37): error CS1061: 'ICollection<CoordinatorGroup>' does not contain a definition for 'Group' and no accessible extension method 'Group' accepting a first argument of type 'ICollection<CoordinatorGroup>' could be found (are you missing a using directive or an assembly reference?) [C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\Backend.API.csproj]
+    6 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:01.25

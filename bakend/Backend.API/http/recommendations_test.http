@@ -1,0 +1,79 @@
+@host = http://localhost:5246
+
+### --- School Structure ---
+
+### Get School Levels (to find IDs)
+GET {{host}}/api/SchoolLevels
+Accept: application/json
+
+### Create School Grade
+# Replace levelId with a valid one from above
+POST {{host}}/api/SchoolGrades
+Content-Type: application/json
+
+{
+  "levelId": 1,
+  "name": "Test Grade"
+}
+
+### Get School Grades
+GET {{host}}/api/SchoolGrades
+Accept: application/json
+
+### Create School Group
+# Replace gradeId with a valid one from above
+POST {{host}}/api/SchoolGroups
+Content-Type: application/json
+
+{
+  "gradeId": 1,
+  "name": "Test Group"
+}
+
+### Get School Groups
+GET {{host}}/api/SchoolGroups
+Accept: application/json
+
+
+### --- Incident Types ---
+
+### Get Incident Types (Old Endpoint)
+GET {{host}}/api/Incidents/types
+Accept: application/json
+
+### Get Incident Types (New Controller)
+GET {{host}}/api/IncidentTypes
+Accept: application/json
+
+### Create Incident Type
+POST {{host}}/api/IncidentTypes
+Content-Type: application/json
+
+{
+  "name": "Late Arrival Test",
+  "severity": "Leve",
+  "description": "Created via API"
+}
+
+
+### --- Bulk Grades ---
+
+### Bulk Grade Update
+# Replace IDs with valid ones
+POST {{host}}/api/StudentGrades/bulk
+Content-Type: application/json
+
+[
+  {
+    "evaluationId": 1,
+    "studentId": 1,
+    "score": 85.0,
+    "feedback": "Good work"
+  },
+  {
+    "evaluationId": 1,
+    "studentId": 2,
+    "score": 92.5,
+    "feedback": "Excellent"
+  }
+]

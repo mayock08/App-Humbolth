@@ -38,7 +38,7 @@ const StudentDashboard = () => {
 
     const fetchStudentData = async () => {
         try {
-            const response = await fetch(`http://localhost:5246/api/StudentProfile/${userId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
             if (response.ok) {
                 const data = await response.json();
                 setStudentData(data);
@@ -93,22 +93,38 @@ const StudentDashboard = () => {
     };
 
     // Line Chart Data (Academic History)
+    // Line Chart Data (Academic History - Real Data)
+    // Extract unique evaluation titles for labels (e.g., "Parcial 1", "Examen Final")
+    // If no evaluations, default to empty
+    const uniqueEvaluationTitles = Array.from(new Set(
+        studentData?.grades?.flatMap(g => g.evaluations?.map(e => e.title) || [])
+    ));
+
+    // Sort titles if needed (or just use them as they appear)
+    // For now, simple unique list
+    const chartLabels = uniqueEvaluationTitles.length > 0 ? uniqueEvaluationTitles : ['Sin Evaluaciones'];
+
     const lineData = {
-        labels: ['Parcial 1', 'Parcial 2', 'Parcial 3'],
-        datasets: studentData?.grades?.slice(0, 3).map((grade, idx) => ({
-            label: grade.subject,
-            data: [
-                Math.random() * 2 + 7, // Simulated data for parcial 1
-                Math.random() * 2 + 7, // Simulated data for parcial 2
-                grade.average
-            ],
-            borderColor: `hsl(${idx * 60}, 70%, 50%)`,
-            backgroundColor: `hsla(${idx * 60}, 70%, 50%, 0.1)`,
-            tension: 0.4,
-            borderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6
-        })) || []
+        labels: chartLabels,
+        datasets: studentData?.grades?.slice(0, 5).map((grade, idx) => {
+            // Map evaluations to the labels
+            const dataPoints = chartLabels.map(label => {
+                const ev = grade.evaluations?.find(e => e.title === label);
+                return ev ? ev.score : null; // null for missing evaluations
+            });
+
+            return {
+                label: grade.subject,
+                data: dataPoints,
+                borderColor: `hsl(${idx * 60}, 70%, 50%)`,
+                backgroundColor: `hsla(${idx * 60}, 70%, 50%, 0.1)`,
+                tension: 0.1, // Less tension for point-to-point grades
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                spanGaps: true // Connect lines if some intermediate data is missing
+            };
+        }) || []
     };
 
     const lineOptions = {
@@ -284,8 +300,8 @@ const StudentDashboard = () => {
                                         </td>
                                         <td className="px-3 py-2 text-center">
                                             <span className={`px-2 py-0.5 text-xs rounded-full ${grade.average >= 8
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {grade.average >= 8 ? 'Aprobado' : 'En mejora'}
                                             </span>

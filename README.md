@@ -10,7 +10,7 @@
 
 - para iniciar el backend:
 - npm run dev   
-
+        
 - para iniciar el frontend:
 - npm run dev   
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import Logo from '../../assets/NewLogo.png'; // Updated to use the new uploaded logo
+import Logo from '../../assets/Logo.png'; // Updated to use the new uploaded logo
 
 const Login = () => {
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5246/api/Auth/login', {
+            const response = await fetch('http://institutohumboldt.mx:8080/api/Auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

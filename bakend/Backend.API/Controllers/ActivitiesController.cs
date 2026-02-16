@@ -113,6 +113,16 @@ namespace Backend.API.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/Activities/teacher/5
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<ActionResult<IEnumerable<Activity>>> GetActivitiesByTeacher(long teacherId)
+        {
+            return await _context.Activities
+                .Where(a => a.TeacherId == teacherId)
+                .OrderByDescending(a => a.CreatedAt)
+                .ToListAsync();
+        }
+
         private bool ActivityExists(long id)
         {
             return _context.Activities.Any(e => e.Id == id);

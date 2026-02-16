@@ -1,0 +1,68 @@
+@host = http://localhost:5038
+
+### 1. Create IQ Test with Visual Option
+POST {{host}}/api/IqTests
+Content-Type: application/json
+
+{
+  "name": "Test de Inteligencia Visual",
+  "description": "Evaluación de razonamiento visual",
+  "totalTimeMinutes": 30,
+  "isActive": true,
+  "sections": [
+    {
+      "name": "Razonamiento Lógico",
+      "orderIndex": 1,
+      "questions": [
+        {
+          "text": "¿Qué figura completa la secuencia?",
+          "imageUrl": "https://example.com/question1.png",
+          "questionType": "multiple_choice",
+          "score": 10,
+          "abilityDomain": "Logic",
+          "options": [
+            { "text": "Opción A", "optionKey": "A", "imageUrl": "https://example.com/optA.png", "isCorrect": false },
+            { "text": "Opción B", "optionKey": "B", "imageUrl": "https://example.com/optB.png", "isCorrect": true },
+            { "text": "Opción C", "optionKey": "C", "imageUrl": "https://example.com/optC.png", "isCorrect": false }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+### 2. Assign Test to Group 1 (Active)
+POST {{host}}/api/IqTests/assign
+Content-Type: application/json
+
+{
+  "testId": 1,
+  "groupId": 1,
+  "isActive": true,
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2025-12-31T23:59:59Z"
+}
+
+### 3. Get Active Test for Student 1 (Assuming Student 1 is in Group 1)
+GET {{host}}/api/IqTests/student/1/active
+Accept: application/json
+
+### 4. Submit IQ Test for Student 1
+POST {{host}}/api/IqTests/submit
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "testId": 1,
+  "startedAt": "2024-02-12T10:00:00Z",
+  "answers": [
+    {
+      "questionId": 1,
+      "selectedOptionId": 2 
+    }
+  ]
+}
+
+### 5. Verify Student Profile Updated (Expect IqScore = ~160 due to 100% score)
+GET {{host}}/api/StudentProfile/1
+Accept: application/json

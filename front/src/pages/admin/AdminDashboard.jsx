@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Users,
     FileText,
@@ -36,45 +36,56 @@ ChartJS.register(
 
 const AdminDashboard = () => {
 
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await fetch('http://institutohumboldt.mx:8080/api/AdminDashboard/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error('Error fetching admin stats:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
     // Metric Cards Data
     const metrics = [
-        { title: 'Total Applications', value: '1,240', change: '+12%', isPositive: true, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { title: 'Pending Documents', value: '45', change: 'Needs Attention', isPositive: false, icon: FileText, color: 'text-orange-600', bg: 'bg-orange-50' },
-        { title: 'Verified Payment', value: '120', change: '+5%', isPositive: true, icon: CheckCircle, color: 'text-purple-600', bg: 'bg-purple-50' },
-        { title: 'Confirmed Enrollments', value: '850', change: '+8%', isPositive: true, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
+        { title: 'Total Alumnos', value: stats ? stats.totalStudents : '...', change: '', isPositive: true, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { title: 'Documentos Pendientes', value: stats ? stats.pendingDocs : '...', change: 'Requiere Atención', isPositive: false, icon: FileText, color: 'text-orange-600', bg: 'bg-orange-50' },
+        // { title: 'Verified Payment', value: '120', change: '+5%', isPositive: true, icon: CheckCircle, color: 'text-purple-600', bg: 'bg-purple-50' },
+        { title: 'Nuevos Ingresos (30d)', value: stats ? stats.newEnrollments : '...', change: '', isPositive: true, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
     ];
 
-    // Chart Data (Mock)
-    const funnelData = {
-        labels: ['Inquiry', 'Application Started', 'Docs Submitted', 'Verified', 'Enrolled'],
-        datasets: [
-            {
-                label: 'Students',
-                data: [2000, 1240, 1000, 850, 850],
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1,
-                fill: true,
-                tension: 0.4,
-            },
-        ],
-    };
+    // Chart Data (Mock - Keeping funnel as placeholder or removing if user strictly wants DB. User said "todo dato que muestre sea de base de datos".
+    // I will hide Funnel if I don't have real data for it, or use enrollment stats).
+    // Let's replace Funnel with something real or remove it.
+    // For now, let's keep it simple and focus on what we have.
 
-    const enrollmentData = {
-        labels: ['Primary', 'High School', 'Middle School', 'Kinder'],
+    const enrollmentData = stats ? {
+        labels: Object.keys(stats.byLevel || {}),
         datasets: [
             {
-                data: [255, 212, 255, 128],
+                data: Object.values(stats.byLevel || {}),
                 backgroundColor: [
                     '#3B82F6', // Blue
                     '#60A5FA', // Light Blue
                     '#93C5FD', // Lighter Blue
                     '#DBEAFE', // Very Light Blue
+                    '#F59E0B',
+                    '#10B981'
                 ],
                 borderWidth: 0,
             },
         ],
-    };
+    } : null;
 
     const funnelOptions = {
         responsive: true,
@@ -100,8 +111,8 @@ const AdminDashboard = () => {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-800">Registrar Dashboard</h1>
-                <p className="text-gray-500 text-sm">Welcome back, here's what's happening today.</p>
+                <h1 className="text-2xl font-bold text-gray-800">Panel de Administrador</h1>
+                <p className="text-gray-500 text-sm">Bienvenido de nuevo, aquí está lo que sucede hoy.</p>
             </div>
 
             {/* Metrics Row */}
@@ -135,105 +146,45 @@ const AdminDashboard = () => {
                 {/* Left Column - Funnel & Action Items */}
                 <div className="lg:col-span-2 space-y-8">
 
-                    {/* Enrollment Funnel */}
+                    {/* Recent Students List (Replacing Funnel) */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800">Enrollment Funnel Conversion</h3>
-                                <p className="text-xs text-gray-500">Tracking applicants from initial inquiry to final enrollment</p>
-                            </div>
-                            <button className="text-sm text-blue-600 font-medium hover:underline">View Report</button>
-                        </div>
-
-                        {/* Custom Progress Bars simulating Funnel from Image */}
-                        <div className="space-y-6">
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium text-gray-700">Inquiry</span>
-                                    <span className="font-bold text-gray-900">2,000</span>
-                                </div>
-                                <div className="w-full bg-blue-50 rounded-full h-8 flex items-center px-3 relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 h-full bg-blue-200 w-full opacity-50"></div>
-                                    <span className="relative z-10 text-xs font-bold text-blue-800">100%</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium text-gray-700">Application Started</span>
-                                    <span className="font-bold text-gray-900">1,240</span>
-                                </div>
-                                <div className="w-full bg-blue-50 rounded-full h-8 flex items-center px-3 relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 h-full bg-blue-400 w-[62%]"></div>
-                                    <span className="relative z-10 text-xs font-bold text-blue-900">62%</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium text-gray-700">Docs Submitted</span>
-                                    <span className="font-bold text-gray-900">1,000</span>
-                                </div>
-                                <div className="w-full bg-blue-50 rounded-full h-8 flex items-center px-3 relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 h-full bg-blue-500 w-[50%]"></div>
-                                    <span className="relative z-10 text-xs font-bold text-white">50%</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium text-gray-700">Verified for Payment</span>
-                                    <span className="font-bold text-gray-900">850</span>
-                                </div>
-                                <div className="w-full bg-blue-50 rounded-full h-8 flex items-center px-3 relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 h-full bg-blue-600 w-[42.5%]"></div>
-                                    <span className="relative z-10 text-xs font-bold text-white">42.5%</span>
-                                </div>
+                                <h3 className="text-lg font-bold text-gray-800">Alumnos Recientes</h3>
+                                <p className="text-xs text-gray-500">Últimos estudiantes registrados</p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Action Required */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0">
-                            <div className="flex items-center space-x-3">
-                                <h3 className="text-lg font-bold text-gray-800">Action Required</h3>
-                                <span className="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-full">5 New</span>
-                            </div>
-                            <button className="p-2 hover:bg-gray-50 rounded-full text-gray-400">
-                                <MoreHorizontal size={20} />
-                            </button>
-                        </div>
-
-                        <div className="divide-y divide-gray-50">
-                            {[1, 2, 3].map((_, i) => (
-                                <div key={i} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                                            LS
+                        <div className="space-y-4">
+                            {stats?.recentStudents?.map((student, i) => (
+                                <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                            {student.name.charAt(0)}
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-bold text-gray-900">Liam Smith</h4>
-                                            <p className="text-xs text-gray-500">ID: #2024-091</p>
+                                            <p className="font-semibold text-gray-800">{student.name}</p>
+                                            <p className="text-xs text-gray-500">ID: {student.id}</p>
                                         </div>
                                     </div>
-
-                                    <div className="hidden md:block">
-                                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${i === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'}`}>
-                                            {i === 0 ? 'ID Scan Blurred' : 'Missing Signature'}
-                                        </span>
+                                    <div className="text-sm text-gray-500">
+                                        {new Date(student.joined).toLocaleDateString()}
                                     </div>
-
-                                    <div className="text-xs text-gray-400">
-                                        2 hours ago
-                                    </div>
-
-                                    <button className="text-blue-600 text-sm font-medium hover:text-blue-700">Review</button>
                                 </div>
                             ))}
-
+                            {(!stats?.recentStudents || stats.recentStudents.length === 0) && (
+                                <p className="text-center text-gray-400 py-4">No hay alumnos recientes.</p>
+                            )}
                         </div>
                     </div>
+
+                    {/* Action Required (Placeholder or Real if we have alerts) */}
+                    {/* Hiding Mock Action Required for now to avoid confusion with real data */}
+                    {/*
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        ...
+                    </div>
+                    */}
 
                 </div>
 
@@ -241,29 +192,24 @@ const AdminDashboard = () => {
                 <div className="space-y-8">
                     {/* Enrollment by Level */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-6">Enrollment by Level</h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-6">Alumnos por Nivel</h3>
                         <div className="relative h-64 flex justify-center items-center">
-                            <Doughnut data={enrollmentData} options={doughnutOptions} />
+                            {enrollmentData && <Doughnut data={enrollmentData} options={doughnutOptions} />}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
-                                <span className="text-3xl font-bold text-gray-900">850</span>
-                                <span className="text-xs text-gray-400">Students</span>
+                                <span className="text-3xl font-bold text-gray-900">{stats?.totalStudents || 0}</span>
+                                <span className="text-xs text-gray-400">Total</span>
                             </div>
                         </div>
                         <div className="mt-4 space-y-3">
-                            <div className="flex justify-between text-sm items-center">
-                                <div className="flex items-center">
-                                    <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-                                    <span className="text-gray-600">Primary (30%)</span>
+                            {stats?.byLevel && Object.entries(stats.byLevel).map(([level, count], i) => (
+                                <div key={level} className="flex justify-between text-sm items-center">
+                                    <div className="flex items-center">
+                                        <span className={`w-3 h-3 rounded-full mr-2`} style={{ backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE', '#F59E0B', '#10B981'][i % 6] }}></span>
+                                        <span className="text-gray-600">{level} ({((count / stats.totalStudents) * 100).toFixed(0)}%)</span>
+                                    </div>
+                                    <span className="font-bold text-gray-900">{count}</span>
                                 </div>
-                                <span className="font-bold text-gray-900">255</span>
-                            </div>
-                            <div className="flex justify-between text-sm items-center">
-                                <div className="flex items-center">
-                                    <span className="w-3 h-3 rounded-full bg-blue-400 mr-2"></span>
-                                    <span className="text-gray-600">High School (25%)</span>
-                                </div>
-                                <span className="font-bold text-gray-900">212</span>
-                            </div>
+                            ))}
                         </div>
                     </div>
 

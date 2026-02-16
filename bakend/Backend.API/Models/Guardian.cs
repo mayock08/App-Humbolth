@@ -22,6 +22,9 @@ namespace Backend.API.Models
         [Column("email")]
         public string? Email { get; set; }
 
+        [Column("password_hash")]
+        public string? PasswordHash { get; set; }
+
         [Column("workplace")]
         [MaxLength(100)]
         public string? Workplace { get; set; }

@@ -16,7 +16,7 @@ import {
     CreditCard,
     Smartphone as SmartphoneIcon
 } from 'lucide-react';
-import Logo from '../assets/NewLogo.png';
+import Logo from '../assets/Logo.png';
 
 const AdministratorLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,7 +27,9 @@ const AdministratorLayout = ({ children }) => {
         { path: '/admissions', icon: Users, label: 'Admissions' },
         { path: '/students', icon: GraduationCap, label: 'Students' },
         { path: '/mobile-access', icon: SmartphoneIcon, label: 'Mobile Access' },
+        { path: '/teachers', icon: Users, label: 'Profesores' }, // New Teacher Management
         { path: '/class-grouping', icon: Users, label: 'Class Grouping' }, // New from image
+        { path: '/coordinators', icon: Users, label: 'Coordinadores' },
         { path: '/schedule', icon: Calendar, label: 'Schedule' }, // New from image
         { path: '/subjects', icon: FileText, label: 'Subjects' },
         { path: '/finance', icon: CreditCard, label: 'Finance' },

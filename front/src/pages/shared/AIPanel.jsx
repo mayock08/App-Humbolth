@@ -32,7 +32,7 @@ const AIPanel = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5246/api/AI/chat', {
+            const response = await fetch('http://institutohumboldt.mx:8080/api/AI/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: input })
@@ -99,8 +99,8 @@ const AIPanel = () => {
                         >
                             <div
                                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === 'user'
-                                        ? 'bg-primary text-white'
-                                        : 'bg-gray-100 text-gray-800'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-gray-100 text-gray-800'
                                     }`}
                             >
                                 {msg.role === 'assistant' && (

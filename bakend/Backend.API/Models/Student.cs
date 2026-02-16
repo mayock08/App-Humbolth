@@ -12,6 +12,10 @@ namespace Backend.API.Models
         public long Id { get; set; }
 
         // Datos Básicos
+        [Column("matricula")]
+        [MaxLength(50)]
+        public string? Matricula { get; set; }
+
         [Required]
         [Column("first_name")]
         [MaxLength(100)]
@@ -151,5 +155,8 @@ namespace Backend.API.Models
         public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
         public ICollection<StudentActivity> StudentActivities { get; set; } = new List<StudentActivity>();
         public ICollection<IqTestAttempt> IqTestAttempts { get; set; } = new List<IqTestAttempt>();
+
+        [Column("iq_score")]
+        public int? IqScore { get; set; }
     }
 }

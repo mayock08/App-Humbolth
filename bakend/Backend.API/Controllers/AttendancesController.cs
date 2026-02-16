@@ -66,6 +66,62 @@ namespace Backend.API.Controllers
             return CreatedAtAction(nameof(GetAttendance), new { id = attendance.Id }, attendance);
         }
 
+        // POST: api/Attendances/bulk
+        [HttpPost("bulk")]
+        public async Task<ActionResult<IEnumerable<Attendance>>> PostBulkAttendance(List<Attendance> attendances)
+        {
+            if (attendances == null || !attendances.Any())
+            {
+                return BadRequest("No attendance records provided.");
+            }
+
+            var courseId = attendances.First().CourseId;
+            var date = attendances.First().ClassDate.Date;
+
+            // Optional: Check if already exists for this date/course to prevent duplicates or allow update?
+            // For now, let's assume we might want to update or insert.
+            // Strategy: Remove existing for this date/course and insert new ones (simple replace)
+            // Or better: Upsert.
+
+            foreach (var att in attendances)
+            {
+                att.CreatedAt = DateTime.UtcNow;
+                att.ClassDate = att.ClassDate.Date; // Ensure time is stripped
+
+                var existing = await _context.Attendances
+                    .FirstOrDefaultAsync(a => a.StudentId == att.StudentId && 
+                                              a.CourseId == att.CourseId && 
+                                              a.ClassDate == att.ClassDate);
+
+                if (existing != null)
+                {
+                    existing.Status = att.Status;
+                    existing.Note = att.Note;
+                    existing.Emotion = att.Emotion;
+                    _context.Entry(existing).State = EntityState.Modified;
+                }
+                else
+                {
+                    _context.Attendances.Add(att);
+                }
+            }
+            
+            await _context.SaveChangesAsync();
+
+            return Ok(attendances);
+        }
+
+        // GET: api/Attendances/course/5/date/2023-10-27
+        [HttpGet("course/{courseId}/date/{date}")]
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetAttendanceByDate(long courseId, DateTime date)
+        {
+            var attendanceList = await _context.Attendances
+                .Where(a => a.CourseId == courseId && a.ClassDate == date.Date)
+                .ToListAsync();
+
+            return attendanceList;
+        }
+
         // PUT: api/Attendances/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAttendance(long id, Attendance attendance)

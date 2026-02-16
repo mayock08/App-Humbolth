@@ -5,6 +5,11 @@ import 'credential_screen.dart';
 import 'notifications_screen.dart';
 import 'attendance_detail_screen.dart';
 import 'activities_screen.dart';
+import 'reports_screen.dart';
+import 'debts_screen.dart';
+import 'admin_chat_screen.dart';
+import 'iq_test_screen.dart';
+import '../models/iq_test_model.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
@@ -72,41 +77,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _logout() async {
+    await _authService.logout();
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Dashboard',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const CredentialScreen()),
-                        );
-                      },
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppTheme.cardDark,
-                        child: const Icon(Icons.person, color: Colors.white),
-                      ),
-                    ),
-                  ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Humbolth',
+                          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const CredentialScreen()),
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 24,
+                            backgroundColor: AppTheme.cardDark,
+                            child: const Icon(Icons.person, color: Colors.white),
+                          ),
+                        ),
+                      ],
                 ),
-                const SizedBox(height: 32),
                 
                 // Welcome message
                 Text(
@@ -159,8 +176,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 12),
                 MenuCard(
                   icon: Icons.assignment_outlined,
-                  title: 'Assignments',
-                  color: AppTheme.accentBlue,
+                  title: 'Tareas',
+                  color: AppTheme.accentPurple,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -192,6 +209,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
+                const SizedBox(height: 12),
+                MenuCard(
+                  icon: Icons.warning_amber_outlined,
+                  title: 'Reportes',
+                  color: AppTheme.accentOrange,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ReportsScreen()),
+                    );
+                  },
+                ),
+                // Validar Rol 'Parent' o 'Papa' para mostrar Adeudos
+                if (_currentUser?.role == 'Parent' || _currentUser?.role == 'Papa') ...[
+                  const SizedBox(height: 12),
+                  MenuCard(
+                    icon: Icons.attach_money,
+                    title: 'Adeudos',
+                    color: Colors.redAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DebtsScreen()),
+                      );
+                    },
+                  ),
+                ],
+                // Validar Rol 'Admin' para Asistente AI
+                if (_currentUser?.role == 'Admin') ...[
+                  const SizedBox(height: 12),
+                  MenuCard(
+                    icon: Icons.auto_awesome,
+                    title: 'Asistente AI',
+                    color: AppTheme.accentPurple,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AdminChatScreen()),
+                      );
+                    },
+                  ),
+                ],
                 const SizedBox(height: 32),
                 
                 // Upcoming section
@@ -252,7 +311,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-    ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppTheme.primaryDark,
         selectedItemColor: AppTheme.accentBlue,

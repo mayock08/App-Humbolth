@@ -46,6 +46,17 @@ namespace Backend.API.Data
         public DbSet<IqTestAttempt> IqTestAttempts { get; set; }
         public DbSet<IqAnswer> IqAnswers { get; set; }
 
+        // Student Profiling
+        public DbSet<ProfileDimension> ProfileDimensions { get; set; }
+        public DbSet<StudentDimensionScore> StudentDimensionScores { get; set; }
+        public DbSet<InterestCategory> InterestCategories { get; set; }
+        public DbSet<Interest> Interests { get; set; }
+        public DbSet<StudentInterest> StudentInterests { get; set; }
+
+        // Question Pools
+        public DbSet<QuestionPool> QuestionPools { get; set; }
+        public DbSet<PoolQuestion> PoolQuestions { get; set; }
+
         // N8N & Roles
         public DbSet<Role> Roles { get; set; }
         public DbSet<N8nMemory> N8nMemories { get; set; }
@@ -53,6 +64,18 @@ namespace Backend.API.Data
         public DbSet<N8nStagingPool> N8nStagingPools { get; set; }
         public DbSet<N8nStagingQuestion> N8nStagingQuestions { get; set; }
         
+        // Incidents
+        public DbSet<IncidentType> IncidentTypes { get; set; }
+
+        public DbSet<StudentIncident> StudentIncidents { get; set; }
+
+        // Coordinators
+        public DbSet<Coordinator> Coordinators { get; set; }
+        public DbSet<CoordinatorGroup> CoordinatorGroups { get; set; }
+
+        // Notifications
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<IqTestGroup> IqTestGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +96,10 @@ namespace Backend.API.Data
 
             modelBuilder.Entity<StudentCourseEvaluation>()
                 .HasIndex(e => new { e.StudentId, e.EvaluationId })
+                .IsUnique();
+
+            modelBuilder.Entity<CoordinatorGroup>()
+                .HasIndex(cg => new { cg.CoordinatorId, cg.GroupId })
                 .IsUnique();
 
             // Configure decimal precision

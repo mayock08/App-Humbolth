@@ -1,0 +1,10 @@
+@host = http://localhost:5038
+
+### 1. Test Admin Chat Proxy
+POST {{host}}/api/N8N/chat
+Content-Type: application/json
+
+{
+    "message": "Hola, ¿cómo puedo mejorar el rendimiento de mis estudiantes?",
+    "userId": "1"
+}

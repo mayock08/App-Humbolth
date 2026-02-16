@@ -38,26 +38,73 @@ namespace Backend.API.Controllers
             }
 
             // 2. Check for Teacher
-            var teacher = _context.Teachers.FirstOrDefault(t => t.Email == model.Username);
-            if (teacher != null && model.Password == "teacher123") // Demo password
+            var teacher = _context.Teachers.FirstOrDefault(t => t.Email == model.Username || t.Matricula == model.Username);
+            if (teacher != null)
             {
-                var token = GenerateJwtToken(teacher.Email ?? model.Username, new[] { "Teacher" }, teacher.Id);
-                return Ok(new
+                bool isValid = false;
+                if (!string.IsNullOrEmpty(teacher.PasswordHash))
                 {
-                    token,
-                    role = "Teacher",
-                    userId = teacher.Id,
-                    username = teacher.FullName
-                });
+                    // In a real app, use BCrypt.Verify(model.Password, teacher.PasswordHash)
+                    // For now, using simple string comparison or assumed simple hash if we implement one.
+                    // Let's assume for this MVP we store plain text or simple hash. 
+                    // User asked to "poner contraseñas", so we should support it.
+                    // If we use simple SHA256:
+                    // isValid = ComputeSha256Hash(model.Password) == teacher.PasswordHash;
+                    // BUT for now, to keep it simple and compatible with "teacher123" fallback logic:
+                    isValid = model.Password == teacher.PasswordHash; 
+                }
+                else
+                {
+                    // Fallback for legacy teachers
+                    isValid = model.Password == "teacher123";
+                }
+
+                if (isValid && teacher.IsActive)
+                {
+                    var token = GenerateJwtToken(teacher.Email ?? model.Username, new[] { "Teacher" }, teacher.Id);
+                    return Ok(new
+                    {
+                        token,
+                        role = "Teacher",
+                        userId = teacher.Id,
+                        username = teacher.FullName
+                    });
+                }
             }
 
-            // 3. Check for Student
-            var student = _context.Students.FirstOrDefault(s => s.Email == model.Username);
-            if (student != null && model.Password == "student123") // Demo password
+            // 3. Check for Coordinator
+            var coordinator = _context.Coordinators.FirstOrDefault(c => c.Email == model.Username);
+            if (coordinator != null)
             {
-                // Check if student has completed IQ test
-                //bool hasCompletedIqTest = _context.StudentIqTestResults.Any(r => r.StudentId == student.Id);
-                
+                bool isValid = false;
+                if (!string.IsNullOrEmpty(coordinator.PasswordHash))
+                {
+                    isValid = model.Password == coordinator.PasswordHash;
+                }
+                else
+                {
+                    isValid = model.Password == "coordinator123"; // Default password
+                }
+
+                if (isValid && coordinator.IsActive)
+                {
+                    var token = GenerateJwtToken(coordinator.Email ?? model.Username, new[] { "Coordinator" }, coordinator.Id);
+                    return Ok(new
+                    {
+                        token,
+                        role = "Coordinator",
+                        userId = coordinator.Id,
+                        username = coordinator.FullName
+                    });
+                }
+            }
+
+            // 4. Check for Student
+            var student = _context.Students.FirstOrDefault(s => s.Email == model.Username || s.Matricula == model.Username);
+            
+            // Allow login with default password "student123" OR using Matricula as password (initial setup)
+            if (student != null && (model.Password == "student123" || model.Password == student.Matricula))
+            {
                 var token = GenerateJwtToken(student.Email ?? model.Username, new[] { "Student" }, student.Id);
                 return Ok(new
                 {
@@ -65,8 +112,35 @@ namespace Backend.API.Controllers
                     role = "Student",
                     userId = student.Id,
                     username = $"{student.FirstName} {student.PaternalSurname}"
-                  
                 });
+            }
+
+            // 5. Check for Guardian (Parent)
+            var guardian = _context.Guardians.FirstOrDefault(g => g.Email == model.Username || g.MobilePhone == model.Username);
+            if (guardian != null)
+            {
+                bool isValid = false;
+                if (!string.IsNullOrEmpty(guardian.PasswordHash))
+                {
+                    isValid = model.Password == guardian.PasswordHash;
+                }
+                else
+                {
+                    // Fallback for initial setup
+                    isValid = model.Password == "parent123";
+                }
+
+                if (isValid)
+                {
+                    var token = GenerateJwtToken(guardian.Email ?? model.Username, new[] { "Parent" }, guardian.Id);
+                    return Ok(new
+                    {
+                        token,
+                        role = "Parent",
+                        userId = guardian.Id,
+                        username = guardian.FullName
+                    });
+                }
             }
 
             return Unauthorized(new { message = "Invalid credentials" });

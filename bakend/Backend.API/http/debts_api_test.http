@@ -1,0 +1,13 @@
+@host = http://localhost:5038
+
+### 1. Get Debts for Student with ID 1 (Has Debts)
+GET {{host}}/api/Debts/student/1
+Accept: application/json
+
+### 2. Get Debts for Student with ID 10 (Has Debts)
+GET {{host}}/api/Debts/student/10
+Accept: application/json
+
+### 3. Get Debts for Student with ID 99 (No Debts)
+GET {{host}}/api/Debts/student/99
+Accept: application/json

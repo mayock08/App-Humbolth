@@ -97,9 +97,44 @@ namespace Backend.API.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}/credentials")]
+        public async Task<IActionResult> SetPassword(long id, [FromBody] TeacherCredentialsDto model)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher == null) return NotFound();
+
+            // In real app: hash the password. 
+            // For this MVP per logic in AuthController:
+            teacher.PasswordHash = model.Password; 
+            
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> SetStatus(long id, [FromBody] TeacherStatusDto model)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher == null) return NotFound();
+
+            teacher.IsActive = model.IsActive;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         private bool TeacherExists(long id)
         {
             return _context.Teachers.Any(e => e.Id == id);
         }
+    }
+
+    public class TeacherCredentialsDto
+    {
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class TeacherStatusDto
+    {
+        public bool IsActive { get; set; }
     }
 }

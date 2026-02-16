@@ -15,6 +15,10 @@ namespace Backend.API.Models
         [Column("full_name")]
         public string FullName { get; set; } = string.Empty;
 
+        [Column("matricula")]
+        [MaxLength(50)]
+        public string? Matricula { get; set; }
+
         [Column("email")]
         public string? Email { get; set; }
 
@@ -24,6 +28,12 @@ namespace Backend.API.Models
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column("password_hash")]
+        public string? PasswordHash { get; set; }
+
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
 
         // Navigation Properties
         public ICollection<Course> Courses { get; set; } = new List<Course>();
@@ -108,6 +118,10 @@ namespace Backend.API.Models
 
         [Column("note")]
         public string? Note { get; set; }
+
+        [Column("emotion")]
+        [MaxLength(20)]
+        public string? Emotion { get; set; } // 'Feliz', 'Triste', etc.
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

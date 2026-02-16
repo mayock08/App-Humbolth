@@ -18,7 +18,7 @@ const TeacherGrades = () => {
 
     const fetchTeacherCourses = async () => {
         try {
-            const response = await fetch(`http://localhost:5246/api/Courses?teacherId=${teacherId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/Courses?teacherId=${teacherId}`);
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data);
@@ -30,7 +30,7 @@ const TeacherGrades = () => {
 
     const fetchCourseStudents = async (courseId) => {
         try {
-            const response = await fetch(`http://localhost:5246/api/StudentProfile/List?courseId=${courseId}`);
+            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/List?courseId=${courseId}`);
             if (response.ok) {
                 const data = await response.json();
                 setStudents(data);
