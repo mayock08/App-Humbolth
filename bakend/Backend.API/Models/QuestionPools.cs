@@ -23,6 +23,9 @@ namespace Backend.API.Models
         [Column("description")]
         public string? Description { get; set; }
 
+        [Column("course_id")]
+        public long? CourseId { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -31,6 +34,9 @@ namespace Backend.API.Models
         
         [ForeignKey("TeacherId")]
         public Teacher? Teacher { get; set; }
+
+        [ForeignKey("CourseId")]
+        public Course? Course { get; set; }
     }
 
     [Table("pool_questions", Schema = "public")]
@@ -57,6 +63,9 @@ namespace Backend.API.Models
 
         [Column("correct_answer_json", TypeName = "jsonb")]
         public string? CorrectAnswerJson { get; set; }
+
+        [Column("image_url")]
+        public string? ImageUrl { get; set; }
 
         [Column("points")]
         public decimal Points { get; set; } = 1.0m;

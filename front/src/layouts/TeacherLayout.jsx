@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, GraduationCap, LogOut } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, LogOut, BookOpen } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 
@@ -43,6 +43,24 @@ const TeacherLayout = ({ children }) => {
                         label="Calificaciones"
                         to="/teacher-grades"
                         active={location.pathname === '/teacher-grades'}
+                    />
+                    <SidebarItem
+                        icon={BookOpen}
+                        label="Actividades"
+                        to="/teacher-activities"
+                        active={location.pathname === '/teacher-activities'}
+                    />
+                    <SidebarItem
+                        icon={BookOpen}
+                        label="Evaluación"
+                        to="/teacher-continuous-evaluation"
+                        active={location.pathname === '/teacher-continuous-evaluation'}
+                    />
+                    <SidebarItem
+                        icon={BookOpen}
+                        label="Bancos Preg."
+                        to="/teacher-question-pools"
+                        active={location.pathname === '/teacher-question-pools'}
                     />
                 </nav>
 

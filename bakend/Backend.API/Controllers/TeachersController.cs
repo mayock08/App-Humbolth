@@ -97,6 +97,59 @@ namespace Backend.API.Controllers
             return NoContent();
         }
 
+        // POST: api/Teachers/5/photo
+        [HttpPost("{id}/photo")]
+        public async Task<IActionResult> UploadPhoto(long id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher == null)
+                return NotFound("Teacher not found.");
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "TeacherPhotos");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            teacher.PhotoUrl = uniqueFileName;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { url = $"/api/Teachers/{id}/photo" });
+        }
+
+        // GET: api/Teachers/5/photo
+        [HttpGet("{id}/photo")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Teacher,Coordinator")]
+        public async Task<IActionResult> GetPhoto(long id)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher == null || string.IsNullOrEmpty(teacher.PhotoUrl))
+                return NotFound();
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "TeacherPhotos");
+            var filePath = Path.Combine(uploadsFolder, teacher.PhotoUrl);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out string? contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            return PhysicalFile(filePath, contentType);
+        }
+
         [HttpPut("{id}/credentials")]
         public async Task<IActionResult> SetPassword(long id, [FromBody] TeacherCredentialsDto model)
         {

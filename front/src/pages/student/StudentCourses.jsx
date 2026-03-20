@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, Calendar, FileText, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 
 const StudentCourses = () => {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const userId = localStorage.getItem('userId');
 
@@ -15,7 +18,9 @@ const StudentCourses = () => {
 
     const fetchStudentCourses = async () => {
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
+            const response = await fetch(`${API_BASE_URL}/StudentProfile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data.courses || []);
@@ -29,7 +34,9 @@ const StudentCourses = () => {
 
     const fetchCourseActivities = async (courseId) => {
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/Activities?courseId=${courseId}`);
+            const response = await fetch(`${API_BASE_URL}/Activities?courseId=${courseId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setActivities(data);
@@ -185,9 +192,18 @@ const StudentCourses = () => {
                         <div className="space-y-4">
                             {/* Course Header */}
                             <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                <div className="mb-4 pb-3 border-b border-gray-200">
-                                    <h2 className="text-base font-bold text-gray-900">{selectedCourse.name}</h2>
-                                    <p className="text-xs text-gray-500">Profesor: {selectedCourse.teacher || 'Sin asignar'}</p>
+                                <div className="mb-4 pb-3 border-b border-gray-200 flex justify-between items-start">
+                                    <div>
+                                        <h2 className="text-base font-bold text-gray-900">{selectedCourse.name}</h2>
+                                        <p className="text-xs text-gray-500">Profesor: {selectedCourse.teacher || 'Sin asignar'}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => navigate(`/student-tasks/${selectedCourse.id}`)}
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg>
+                                        Ver Tareas Dinámicas
+                                    </button>
                                 </div>
 
                                 {/* Evaluation Structure */}

@@ -14,9 +14,15 @@ import {
     UserX,
     UserCheck,
     Mail,
+    ToggleLeft,
     Phone,
-    CreditCard
+    CreditCard,
+    BookOpen,
+    Camera
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
+import PhotoUploadModal from '../../components/PhotoUploadModal';
+import SecureImage from '../../components/SecureImage';
 
 const TeacherManagement = () => {
     const [teachers, setTeachers] = useState([]);
@@ -28,6 +34,10 @@ const TeacherManagement = () => {
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
     const [currentTeacher, setCurrentTeacher] = useState(null);
+
+    // Photo Modal state
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const [selectedPhotoTeacher, setSelectedPhotoTeacher] = useState(null);
 
     // Form data
     const [formData, setFormData] = useState({
@@ -51,7 +61,9 @@ const TeacherManagement = () => {
     const fetchTeachers = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://institutohumboldt.mx:8080/api/Teachers');
+            const response = await fetch(`${API_BASE_URL}/Teachers`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setTeachers(data);
@@ -100,8 +112,8 @@ const TeacherManagement = () => {
         e.preventDefault();
         try {
             const url = currentTeacher
-                ? `http://institutohumboldt.mx:8080/api/Teachers/${currentTeacher.id}`
-                : 'http://institutohumboldt.mx:8080/api/Teachers';
+                ? `${API_BASE_URL}/Teachers/${currentTeacher.id}`
+                : `${API_BASE_URL}/Teachers`;
 
             const method = currentTeacher ? 'PUT' : 'POST';
 
@@ -110,7 +122,10 @@ const TeacherManagement = () => {
 
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -146,9 +161,12 @@ const TeacherManagement = () => {
 
         try {
             // Update Status
-            const statusResponse = await fetch(`http://institutohumboldt.mx:8080/api/Teachers/${currentTeacher.id}/status`, {
+            const statusResponse = await fetch(`${API_BASE_URL}/Teachers/${currentTeacher.id}/status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ isActive: accessData.isActive })
             });
 
@@ -156,9 +174,12 @@ const TeacherManagement = () => {
 
             // Update Password if provided
             if (accessData.password) {
-                const credsResponse = await fetch(`http://institutohumboldt.mx:8080/api/Teachers/${currentTeacher.id}/credentials`, {
+                const credsResponse = await fetch(`${API_BASE_URL}/Teachers/${currentTeacher.id}/credentials`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
                     body: JSON.stringify({ password: accessData.password })
                 });
 
@@ -169,6 +190,97 @@ const TeacherManagement = () => {
             setIsAccessModalOpen(false);
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    // --- Photo Management Handlers ---
+    const handleManagePhoto = (teacher) => {
+        setSelectedPhotoTeacher(teacher);
+        setShowPhotoModal(true);
+    };
+
+    const handlePhotoSuccess = (newUrl) => {
+        setTeachers(prev => prev.map(t => t.id === selectedPhotoTeacher.id ? { ...t, photoUrl: newUrl } : t));
+        setShowPhotoModal(false);
+    };
+
+    // --- Subjects View Handlers ---
+    const [isSubjectsModalOpen, setIsSubjectsModalOpen] = useState(false);
+    const [teacherSubjects, setTeacherSubjects] = useState([]);
+    const [loadingSubjects, setLoadingSubjects] = useState(false);
+
+    const handleOpenSubjects = async (teacher) => {
+        setCurrentTeacher(teacher);
+        setIsSubjectsModalOpen(true);
+        fetchTeacherSubjects(teacher.id);
+    };
+
+    const fetchTeacherSubjects = async (teacherId) => {
+        setTeacherSubjects([]);
+        setLoadingSubjects(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/Courses?teacherId=${teacherId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTeacherSubjects(data);
+            } else {
+                setError('Error al cargar materias del profesor');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Error de conexión al cargar materias');
+        } finally {
+            setLoadingSubjects(false);
+        }
+    };
+
+    const handleUnassignSubject = async (subject) => {
+        if (!window.confirm(`¿Estás seguro de desasignar la materia "${subject.name}" de este profesor?`)) return;
+
+        try {
+            // Fetch current subject data first to preserve other fields
+            const getRes = await fetch(`${API_BASE_URL}/Courses/${subject.id}`);
+            if (!getRes.ok) throw new Error('Error recuperando datos de la materia');
+
+            const currentSubjectData = await getRes.json();
+
+            // Prepare payload with TeacherId = null
+            // We must strip navigation properties to avoid validation errors (e.g. "The course field is required" from Enrollments)
+            const payload = {
+                id: currentSubjectData.id,
+                name: currentSubjectData.name,
+                grade: currentSubjectData.grade,
+                teacherId: null, // Explicitly null
+                code: currentSubjectData.code,
+                credits: currentSubjectData.credits,
+                scheduleDays: currentSubjectData.scheduleDays,
+                startTime: currentSubjectData.startTime,
+                endTime: currentSubjectData.endTime,
+                periodId: currentSubjectData.periodId
+            };
+
+            const response = await fetch(`${API_BASE_URL}/Courses/${subject.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                // Refresh list
+                fetchTeacherSubjects(currentTeacher.id);
+            } else {
+                const errText = await response.text();
+                console.error("Unassign error response:", errText);
+                alert('Error al desasignar materia' + errText);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión al desasignar');
         }
     };
 
@@ -241,8 +353,12 @@ const TeacherManagement = () => {
                                 <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold shrink-0">
-                                                {teacher.fullName.substring(0, 2).toUpperCase()}
+                                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold shrink-0 overflow-hidden border border-blue-200">
+                                                {teacher.photoUrl ? (
+                                                    <SecureImage src={teacher.photoUrl} alt="Profesor" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span>{teacher.fullName.substring(0, 2).toUpperCase()}</span>
+                                                )}
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{teacher.fullName}</div>
@@ -271,6 +387,13 @@ const TeacherManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button
+                                            onClick={() => handleManagePhoto(teacher)}
+                                            className="text-gray-600 hover:text-blue-900 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg mx-1 transition-colors"
+                                            title="Gestionar Fotografía"
+                                        >
+                                            <Camera size={18} />
+                                        </button>
+                                        <button
                                             onClick={() => handleOpenAccess(teacher)}
                                             className="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg mx-1 transition-colors"
                                             title="Gestionar Acceso"
@@ -283,6 +406,13 @@ const TeacherManagement = () => {
                                             title="Editar Información"
                                         >
                                             <Edit size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleOpenSubjects(teacher)}
+                                            className="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 p-2 rounded-lg mx-1 transition-colors"
+                                            title="Ver Materias"
+                                        >
+                                            <BookOpen size={18} />
                                         </button>
                                     </td>
                                 </tr>
@@ -435,6 +565,88 @@ const TeacherManagement = () => {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Subjects Modal */}
+            {isSubjectsModalOpen && currentTeacher && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <BookOpen size={18} className="text-purple-600" />
+                                Materias Asignadas: {currentTeacher.fullName}
+                            </h3>
+                            <button onClick={() => setIsSubjectsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-0 overflow-auto flex-1">
+                            {loadingSubjects ? (
+                                <div className="p-8 text-center text-gray-500">
+                                    Cargando materias...
+                                </div>
+                            ) : teacherSubjects.length === 0 ? (
+                                <div className="p-12 text-center text-gray-500 flex flex-col items-center">
+                                    <BookOpen size={48} className="text-gray-200 mb-4" />
+                                    <p className="font-medium text-gray-600">No tiene materias asignadas</p>
+                                    <p className="text-sm mt-1">Asigna materias desde la sección de Gestión de Materias.</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-medium">
+                                        <tr>
+                                            <th className="px-6 py-3">Materia</th>
+                                            <th className="px-6 py-3">Grado</th>
+                                            <th className="px-6 py-3 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {teacherSubjects.map((subject) => (
+                                            <tr key={subject.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-3 font-medium text-gray-900">{subject.name}</td>
+                                                <td className="px-6 py-3">
+                                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded">
+                                                        {subject.grade || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-3 text-right">
+                                                    <button
+                                                        onClick={() => handleUnassignSubject(subject)}
+                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+                                                        title="Desasignar Materia"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                            <button
+                                onClick={() => setIsSubjectsModalOpen(false)}
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Photo Modal */}
+            {showPhotoModal && selectedPhotoTeacher && (
+                <PhotoUploadModal
+                    entityId={selectedPhotoTeacher.id}
+                    entityType="teacher"
+                    currentPhotoUrl={selectedPhotoTeacher.photoUrl}
+                    onClose={() => setShowPhotoModal(false)}
+                    onSuccess={handlePhotoSuccess}
+                />
             )}
         </div>
     );

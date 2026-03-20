@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Users, BookOpen, UserCog, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, UserCog, Settings, LogOut, UserPlus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import i18n from '../i18n';
 import Logo from '../assets/Logo.png';
@@ -38,7 +38,8 @@ const DashboardLayout = ({ children }) => {
 
                 <nav className="flex-1 w-full flex flex-col gap-2">
                     <SidebarItem icon={LayoutDashboard} label={t('dashboard')} to="/dashboard" active={location.pathname === '/dashboard'} />
-                    <SidebarItem icon={Users} label={t('attendance')} to="/attendance" />
+                    <SidebarItem icon={Users} label="Alumnos" to="/students" active={location.pathname === '/students'} />
+                    <SidebarItem icon={UserPlus} label="Admisiones" to="/admissions" active={location.pathname === '/admissions'} />
                     <SidebarItem icon={BookOpen} label={t('subjects')} to="/subjects" active={location.pathname === '/subjects'} />
                     <SidebarItem icon={UserCog} label="Supervisor" to="/supervisor" />
                     <SidebarItem icon={Settings} label={t('settings')} to="/settings" />

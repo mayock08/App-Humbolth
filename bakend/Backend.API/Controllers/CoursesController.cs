@@ -18,12 +18,26 @@ namespace Backend.API.Controllers
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
+        public async Task<ActionResult<IEnumerable<Course>>> GetCourses([FromQuery] int? periodId = null, [FromQuery] long? teacherId = null)
         {
-            return await _context.Courses
+            var query = _context.Courses
                 .Include(c => c.Teacher)
+                .Include(c => c.Period)
+                .Include(c => c.Level)
                 .Include(c => c.GradingCriteria)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (periodId.HasValue)
+            {
+                query = query.Where(c => c.PeriodId == periodId);
+            }
+
+            if (teacherId.HasValue)
+            {
+                query = query.Where(c => c.TeacherId == teacherId);
+            }
+
+            return await query.ToListAsync();
         }
 
         // GET: api/Courses/5
@@ -32,6 +46,7 @@ namespace Backend.API.Controllers
         {
             var course = await _context.Courses
                 .Include(c => c.Teacher)
+                .Include(c => c.Level)
                 .Include(c => c.GradingCriteria)
                     .ThenInclude(gc => gc.Evaluations)
                 .Include(c => c.Enrollments)
@@ -64,10 +79,27 @@ namespace Backend.API.Controllers
         {
             if (id != course.Id)
             {
-                return BadRequest();
+                return BadRequest("ID mismatch");
             }
 
-            _context.Entry(course).State = EntityState.Modified;
+            var existingCourse = await _context.Courses.FindAsync(id);
+            if (existingCourse == null)
+            {
+                return NotFound();
+            }
+
+            // Update only allowed fields
+            existingCourse.Name = course.Name;
+            existingCourse.Grade = course.Grade;
+            existingCourse.TeacherId = course.TeacherId;
+            existingCourse.Code = course.Code;
+            existingCourse.Credits = course.Credits;
+            existingCourse.ScheduleDays = course.ScheduleDays;
+            existingCourse.StartTime = course.StartTime;
+            existingCourse.EndTime = course.EndTime;
+            existingCourse.PeriodId = course.PeriodId;
+            existingCourse.LevelId = course.LevelId;
+            // distinct from created_at which should remain unchanged
 
             try
             {

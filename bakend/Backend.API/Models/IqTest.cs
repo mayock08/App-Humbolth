@@ -28,7 +28,12 @@ namespace Backend.API.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Column("period_id")]
+        public int? PeriodId { get; set; }
+
         // Navigation Properties
+        [ForeignKey("PeriodId")]
+        public SchoolPeriod? Period { get; set; }
         public ICollection<IqSection> Sections { get; set; } = new List<IqSection>();
         public ICollection<IqTestAttempt> Attempts { get; set; } = new List<IqTestAttempt>();
     }

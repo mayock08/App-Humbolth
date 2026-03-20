@@ -46,7 +46,7 @@ const Settings = () => {
                     icon={School}
                     title="Ciclos Escolares"
                     description="Configurar fechas y periodos académicos."
-                    to="#"
+                    to="/school-periods"
                     color="bg-orange-500"
                 />
                 <SettingsCard

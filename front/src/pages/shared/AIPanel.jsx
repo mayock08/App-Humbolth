@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Sparkles, Loader } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 
 const AIPanel = () => {
     const navigate = useNavigate();
@@ -32,17 +33,23 @@ const AIPanel = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://institutohumboldt.mx:8080/api/AI/chat', {
+            const response = await fetch(`http://localhost:5678/webhook/testStudents`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: input })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sessionId: "123456",
+                    action: "sendMessage",
+                    chatInput: input
+                })
             });
 
             if (response.ok) {
                 const data = await response.json();
                 const assistantMessage = {
                     role: 'assistant',
-                    content: data.response || 'Lo siento, no pude procesar tu solicitud.'
+                    content: data.output || 'Lo siento, no pude procesar tu solicitud.'
                 };
                 setMessages(prev => [...prev, assistantMessage]);
             } else {

@@ -21,7 +21,12 @@ namespace Backend.API.Controllers
         public async Task<ActionResult<IEnumerable<SchoolGroup>>> GetSchoolGroups()
         {
             return await _context.SchoolGroups
+                .Include(g => g.Grade)
+                    .ThenInclude(gr => gr.Level)
                 .Include(g => g.Students)
+                .Include(g => g.GroupTeachers)
+                    .ThenInclude(gt => gt.Teacher)
+                .Include(g => g.Teacher) // Keep for backward compatibility if needed, but we should migrate
                 .ToListAsync();
         }
 
@@ -31,6 +36,9 @@ namespace Backend.API.Controllers
         {
             var schoolGroup = await _context.SchoolGroups
                 .Include(g => g.Students)
+                .Include(g => g.GroupTeachers)
+                    .ThenInclude(gt => gt.Teacher)
+                .Include(g => g.Teacher)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (schoolGroup == null)
@@ -68,7 +76,58 @@ namespace Backend.API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(schoolGroup).State = EntityState.Modified;
+            var existingGroup = await _context.SchoolGroups
+                .Include(g => g.GroupTeachers)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (existingGroup == null)
+            {
+                return NotFound();
+            }
+
+            // Update properties
+            existingGroup.Name = schoolGroup.Name;
+            existingGroup.GradeId = schoolGroup.GradeId;
+            
+            // Update GroupTeachers
+            // We assume that if the payload contains GroupTeachers, we replace the list.
+            // If the payload comes from a client that doesn't know about GroupTeachers, it might be empty.
+            // But since we initialized it in the model, it's safer to check if there are explicit changes.
+            // For now, we will replace if the list is sent (count >= 0).
+            
+            // Clear existing relationships
+            existingGroup.GroupTeachers.Clear();
+
+            // Add new relationships
+            if (schoolGroup.GroupTeachers != null)
+            {
+                foreach (var gt in schoolGroup.GroupTeachers)
+                {
+                    // Ensure the Teacher exists? We assume ID is valid or EF will throw FK error.
+                    // We need to create NEW instances to avoid tracking issues if schoolGroup was tracked (it's not, it's param)
+                    existingGroup.GroupTeachers.Add(new SchoolGroupTeacher
+                    {
+                        TeacherId = gt.TeacherId,
+                        Role = gt.Role,
+                        SchoolGroupId = id,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            // Legacy support: Sync TeacherId
+            // If there's a Titular, use that. Otherwise use the first one, or null.
+            var titular = existingGroup.GroupTeachers.FirstOrDefault(t => t.Role == "Titular");
+            if (titular != null)
+            {
+                existingGroup.TeacherId = titular.TeacherId;
+            }
+            else 
+            {
+                // If no titular, check if there's any teacher
+                 var firstTeacher = existingGroup.GroupTeachers.FirstOrDefault();
+                 existingGroup.TeacherId = firstTeacher?.TeacherId;
+            }
 
             try
             {

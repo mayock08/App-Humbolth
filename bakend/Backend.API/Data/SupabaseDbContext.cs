@@ -12,6 +12,7 @@ namespace Backend.API.Data
         // Core Entities
         public DbSet<Student> Students { get; set; }
         public DbSet<Family> Families { get; set; }
+        public DbSet<StudentDocument> StudentDocuments { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
         public DbSet<StudentGuardian> StudentGuardians { get; set; }
 
@@ -19,12 +20,18 @@ namespace Backend.API.Data
         public DbSet<SchoolLevel> SchoolLevels { get; set; }
         public DbSet<SchoolGrade> SchoolGrades { get; set; }
         public DbSet<SchoolGroup> SchoolGroups { get; set; }
+        public DbSet<SchoolPeriod> SchoolPeriods { get; set; }
+        
+        // PlanStuding
+        public DbSet<PlanStuding> PlanStudings { get; set; }
+        public DbSet<PlanStudingCourse> PlanStudingCourses { get; set; }
 
         // Courses
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<AttendanceRegistry> AttendanceRegistries { get; set; }
 
         // Grading
         public DbSet<CourseGradingCriteria> CourseGradingCriteria { get; set; }
@@ -37,6 +44,7 @@ namespace Backend.API.Data
         public DbSet<StudentActivity> StudentActivities { get; set; }
         public DbSet<StudentActivityResponse> StudentActivityResponses { get; set; }
         public DbSet<ActivityFile> ActivityFiles { get; set; }
+        public DbSet<SchoolGroupTeacher> GroupTeachers { get; set; }
 
         // IQ Tests
         public DbSet<IqTest> IqTests { get; set; }
@@ -56,6 +64,10 @@ namespace Backend.API.Data
         // Question Pools
         public DbSet<QuestionPool> QuestionPools { get; set; }
         public DbSet<PoolQuestion> PoolQuestions { get; set; }
+
+        // Tasks
+        public DbSet<CourseTask> CourseTasks { get; set; }
+        public DbSet<TaskSubmission> TaskSubmissions { get; set; }
 
         // N8N & Roles
         public DbSet<Role> Roles { get; set; }
@@ -102,6 +114,18 @@ namespace Backend.API.Data
                 .HasIndex(cg => new { cg.CoordinatorId, cg.GroupId })
                 .IsUnique();
 
+            modelBuilder.Entity<SchoolGroupTeacher>()
+                .HasIndex(x => new { x.SchoolGroupId, x.TeacherId })
+                .IsUnique();
+
+            modelBuilder.Entity<SchoolGroupTeacher>()
+                .HasIndex(x => new { x.SchoolGroupId, x.TeacherId })
+                .IsUnique();
+
+            modelBuilder.Entity<AttendanceRegistry>()
+                .HasIndex(ar => new { ar.CourseId, ar.RegistryDate })
+                .IsUnique();
+
             // Configure decimal precision
             modelBuilder.Entity<CourseGradingCriteria>()
                 .Property(c => c.WeightPercentage)
@@ -129,6 +153,14 @@ namespace Backend.API.Data
 
             modelBuilder.Entity<IqTestAttempt>()
                 .Property(a => a.Percentile)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CourseTask>()
+                .Property(t => t.MaxScore)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<TaskSubmission>()
+                .Property(s => s.Grade)
                 .HasPrecision(5, 2);
         }
     }

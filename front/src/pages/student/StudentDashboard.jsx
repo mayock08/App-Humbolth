@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, Award, TrendingUp } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, RadialLinearScale, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line, Radar } from 'react-chartjs-2';
+import { API_BASE_URL } from '../../config';
 
 // Register ChartJS components
 ChartJS.register(
@@ -38,7 +39,9 @@ const StudentDashboard = () => {
 
     const fetchStudentData = async () => {
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
+            const response = await fetch(`${API_BASE_URL}/StudentProfile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setStudentData(data);

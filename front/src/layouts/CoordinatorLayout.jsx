@@ -21,6 +21,14 @@ const CoordinatorLayout = ({ children }) => {
     // Mock User - in real app get from AuthContext
     const user = { name: 'Coordinador', role: 'Académico' };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        window.location.href = '/login';
+    };
+
     const menuItems = [
         { path: '/coordinator/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         // Future links:
@@ -76,7 +84,10 @@ const CoordinatorLayout = ({ children }) => {
                     })}
 
                     <div className="pt-4 mt-4 border-t border-gray-50">
-                        <button className="w-full flex items-center px-3 py-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center px-3 py-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200"
+                        >
                             <LogOut size={20} />
                             {sidebarOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
                         </button>

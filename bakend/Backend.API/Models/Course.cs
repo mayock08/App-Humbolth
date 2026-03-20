@@ -35,6 +35,9 @@ namespace Backend.API.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Column("photo_url")]
+        public string? PhotoUrl { get; set; }
+
         // Navigation Properties
         public ICollection<Course> Courses { get; set; } = new List<Course>();
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
@@ -57,14 +60,43 @@ namespace Backend.API.Models
         public string Grade { get; set; } = string.Empty;
 
         [Column("teacher_id")]
-        public long TeacherId { get; set; }
+        public long? TeacherId { get; set; }
+
+        [Column("code")]
+        [MaxLength(50)]
+        public string? Code { get; set; }
+
+        [Column("credits")]
+        public int Credits { get; set; } = 0;
+
+        [Column("schedule_days")]
+        [MaxLength(50)]
+        public string? ScheduleDays { get; set; }
+
+        [Column("start_time")]
+        public TimeSpan? StartTime { get; set; }
+
+        [Column("end_time")]
+        public TimeSpan? EndTime { get; set; }
+
+        [Column("period_id")]
+        public int? PeriodId { get; set; }
+
+        [Column("level_id")]
+        public int? LevelId { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
         [ForeignKey("TeacherId")]
-        public Teacher Teacher { get; set; } = null!;
+        public Teacher? Teacher { get; set; }
+
+        [ForeignKey("PeriodId")]
+        public SchoolPeriod? Period { get; set; }
+
+        [ForeignKey("LevelId")]
+        public SchoolLevel? Level { get; set; }
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
         public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();

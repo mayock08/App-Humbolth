@@ -10,6 +10,7 @@ import {
     UserPlus,
     Mail
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -42,7 +43,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch('http://institutohumboldt.mx:8080/api/AdminDashboard/stats');
+                const response = await fetch(`${API_BASE_URL}/AdminDashboard/stats`);
                 if (response.ok) {
                     const data = await response.json();
                     setStats(data);

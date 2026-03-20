@@ -7,8 +7,10 @@ import {
     Trash2,
     Layers,
     X,
-    Check
+    Check,
+    Shield
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 
 const CoordinatorAdmin = () => {
     const [coordinators, setCoordinators] = useState([]);
@@ -30,7 +32,9 @@ const CoordinatorAdmin = () => {
     const fetchCoordinators = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://institutohumboldt.mx:8080/api/Coordinators');
+            const response = await fetch(`${API_BASE_URL}/Coordinators`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCoordinators(data);
@@ -46,14 +50,17 @@ const CoordinatorAdmin = () => {
         e.preventDefault();
         try {
             const url = currentUser
-                ? `http://institutohumboldt.mx:8080/api/Coordinators/${currentUser.id}`
-                : 'http://institutohumboldt.mx:8080/api/Coordinators';
+                ? `${API_BASE_URL}/Coordinators/${currentUser.id}`
+                : `${API_BASE_URL}/Coordinators`;
             const method = currentUser ? 'PUT' : 'POST';
             const payload = currentUser ? { ...formData, id: currentUser.id } : formData;
 
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -71,7 +78,9 @@ const CoordinatorAdmin = () => {
 
         // Load avail groups if not loaded
         if (allGroups.length === 0) {
-            const resp = await fetch('http://institutohumboldt.mx:8080/api/Coordinators/groups');
+            const resp = await fetch(`${API_BASE_URL}/Coordinators/groups`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (resp.ok) {
                 const groups = await resp.json();
                 setAllGroups(groups);
@@ -87,9 +96,12 @@ const CoordinatorAdmin = () => {
 
     const handleSaveAssignments = async () => {
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/Coordinators/${currentUser.id}/assignments`, {
+            const response = await fetch(`${API_BASE_URL}/Coordinators/${currentUser.id}/assignments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(selectedGroupIds)
             });
 

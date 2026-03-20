@@ -33,7 +33,7 @@ namespace Backend.API.Models
 
         // Navigation Properties
         [ForeignKey("CourseId")]
-        public Course Course { get; set; } = null!;
+        public Course? Course { get; set; }
 
         public ICollection<CourseEvaluation> Evaluations { get; set; } = new List<CourseEvaluation>();
     }
@@ -70,7 +70,7 @@ namespace Backend.API.Models
 
         // Navigation Properties
         [ForeignKey("CriteriaId")]
-        public CourseGradingCriteria Criteria { get; set; } = null!;
+        public CourseGradingCriteria? Criteria { get; set; }
 
         public ICollection<StudentCourseEvaluation> StudentEvaluations { get; set; } = new List<StudentCourseEvaluation>();
     }
@@ -103,9 +103,21 @@ namespace Backend.API.Models
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        [Column("period_id")]
+        public int? PeriodId { get; set; }
+
+        [Column("plan_studing_id")]
+        public int? PlanStudingId { get; set; }
+
         // Navigation Properties
         [ForeignKey("StudentId")]
         public Student Student { get; set; } = null!;
+
+        [ForeignKey("PeriodId")]
+        public SchoolPeriod? Period { get; set; }
+
+        [ForeignKey("PlanStudingId")]
+        public PlanStuding? PlanStuding { get; set; }
 
         [ForeignKey("EvaluationId")]
         public CourseEvaluation Evaluation { get; set; } = null!;

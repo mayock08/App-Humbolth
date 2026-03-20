@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, BookOpen, ClipboardList, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, LogOut, Calendar } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 
@@ -37,6 +37,12 @@ const StudentLayout = ({ children }) => {
                         label="Dashboard"
                         to="/student-dashboard"
                         active={location.pathname === '/student-dashboard'}
+                    />
+                    <SidebarItem
+                        icon={Calendar}
+                        label="Schedule"
+                        to="/student-schedule"
+                        active={location.pathname === '/student-schedule'}
                     />
                     <SidebarItem
                         icon={BookOpen}

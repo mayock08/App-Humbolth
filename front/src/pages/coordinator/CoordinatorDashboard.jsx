@@ -19,6 +19,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { API_BASE_URL } from '../../config';
 
 ChartJS.register(
     CategoryScale,
@@ -44,7 +45,9 @@ const CoordinatorDashboard = () => {
                     return;
                 }
 
-                const response = await fetch(`http://institutohumboldt.mx:8080/api/Coordinators/dashboard/${userId}`);
+                const response = await fetch(`${API_BASE_URL}/Coordinators/dashboard/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     setStats(data);

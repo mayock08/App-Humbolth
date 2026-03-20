@@ -18,14 +18,89 @@ namespace Backend.API.Controllers
 
         // GET: api/Students
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudents(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? cycle = null,
+            [FromQuery] int? groupId = null)
         {
-            return await _context.Students
+            var query = _context.Students
                 .Include(s => s.Family)
                 .Include(s => s.Group)
                     .ThenInclude(g => g.Grade)
                         .ThenInclude(gr => gr.Level)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                query = query.Where(s => 
+                    s.FirstName.ToLower().Contains(search) || 
+                    s.PaternalSurname.ToLower().Contains(search) || 
+                    (s.MaternalSurname != null && s.MaternalSurname.ToLower().Contains(search)) ||
+                    (s.Matricula != null && s.Matricula.ToLower().Contains(search))
+                );
+            }
+
+            if (!string.IsNullOrEmpty(cycle))
+            {
+                query = query.Where(s => s.AdmissionCycle == cycle);
+            }
+
+            if (groupId.HasValue)
+            {
+                if (groupId == 0)
+                {
+                    // Filter for unassigned students (GroupId is null)
+                    query = query.Where(s => s.GroupId == null);
+                }
+                else
+                {
+                    // Filter for specific group
+                    query = query.Where(s => s.GroupId == groupId);
+                }
+            }
+
+            // Pagination headers
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            Response.Headers.Add("X-Total-Count", totalItems.ToString());
+            Response.Headers.Add("X-Total-Pages", totalPages.ToString());
+
+            return await query
+                .OrderBy(s => s.PaternalSurname)
+                .ThenBy(s => s.FirstName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+        }
+
+        // GET: api/Students/admissions/stats
+        [HttpGet("admissions/stats")]
+        public async Task<ActionResult<object>> GetAdmissionsStats([FromQuery] string currentCycle)
+        {
+            if (string.IsNullOrEmpty(currentCycle))
+                return BadRequest("Current cycle is required");
+
+            var newStudents = await _context.Students
+                .Where(s => s.AdmissionCycle == currentCycle)
+                .Include(s => s.Group).ThenInclude(g => g.Grade)
+                .ToListAsync();
+
+            var reEnrolled = await _context.Students
+                .Where(s => s.AdmissionCycle != currentCycle && s.Status == "Activo")
+                .Include(s => s.Group).ThenInclude(g => g.Grade)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                NewStudentsCount = newStudents.Count,
+                ReEnrolledCount = reEnrolled.Count,
+                NewStudents = newStudents,
+                ReEnrolled = reEnrolled
+            });
         }
 
         // GET: api/Students/5
@@ -86,6 +161,62 @@ namespace Backend.API.Controllers
             }
 
             return NoContent();
+        }
+
+        // POST: api/Students/5/photo
+        [HttpPost("{id}/photo")]
+        public async Task<IActionResult> UploadPhoto(long id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var student = await _context.Students.FindAsync(id);
+            if (student == null)
+                return NotFound("Student not found.");
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "StudentPhotos");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Save the unique filename in the DB
+            student.PhotoUrl = uniqueFileName;
+            student.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { url = $"/api/Students/{id}/photo" });
+        }
+
+        // GET: api/Students/5/photo
+        [HttpGet("{id}/photo")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Teacher,Coordinator")]
+        public async Task<IActionResult> GetPhoto(long id)
+        {
+            var student = await _context.Students.FindAsync(id);
+            if (student == null || string.IsNullOrEmpty(student.PhotoUrl))
+                return NotFound();
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "StudentPhotos");
+            var filePath = Path.Combine(uploadsFolder, student.PhotoUrl);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out string? contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            return PhysicalFile(filePath, contentType);
         }
 
         // DELETE: api/Students/5

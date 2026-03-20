@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, FileText, AlertCircle, BookOpen, Filter, ChevronDown } from 'lucide-react';
+import { Calendar, FileText, AlertCircle, BookOpen, Filter, ChevronDown, ClipboardList } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 
 const StudentActivities = () => {
     const [activities, setActivities] = useState([]);
@@ -17,7 +18,9 @@ const StudentActivities = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/StudentProfile/${userId}`);
+            const response = await fetch(`${API_BASE_URL}/StudentProfile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data.courses || []);

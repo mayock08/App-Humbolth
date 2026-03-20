@@ -125,10 +125,10 @@ C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\staticw
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\staticwebassets.development.json
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\staticwebassets.build.endpoints.json
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\swae.build.ex.cache
-C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\staticwebassets.upToDateCheck.txt
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\Backend..43CFF112.Up2Date
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\Backend.API.dll
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\refint\Backend.API.dll
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\Backend.API.pdb
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\Backend.API.genruntimeconfig.cache
 C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\ref\Backend.API.dll
+C:\Developer\Humbolth\App-Humbolth\bakend\Backend.API\obj\Release\net9.0\staticwebassets.upToDateCheck.txt

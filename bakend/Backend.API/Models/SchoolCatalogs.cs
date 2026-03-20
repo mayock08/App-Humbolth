@@ -68,8 +68,43 @@ namespace Backend.API.Models
 
         // Navigation Properties
         [ForeignKey("GradeId")]
-        public SchoolGrade Grade { get; set; } = null!;
+        public SchoolGrade? Grade { get; set; }
 
         public ICollection<Student> Students { get; set; } = new List<Student>();
+
+        [Column("teacher_id")]
+        public long? TeacherId { get; set; }
+
+        [ForeignKey("TeacherId")]
+        public Teacher? Teacher { get; set; }
+
+        public ICollection<SchoolGroupTeacher> GroupTeachers { get; set; } = new List<SchoolGroupTeacher>();
+    }
+
+    [Table("school_group_teachers", Schema = "public")]
+    public class SchoolGroupTeacher
+    {
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
+
+        [Column("school_group_id")]
+        public int SchoolGroupId { get; set; }
+
+        [Column("teacher_id")]
+        public long TeacherId { get; set; }
+
+        [Column("role")]
+        [MaxLength(50)]
+        public string? Role { get; set; } // "Titular", "Auxiliar", etc.
+
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [ForeignKey("SchoolGroupId")]
+        public SchoolGroup? SchoolGroup { get; set; }
+
+        [ForeignKey("TeacherId")]
+        public Teacher? Teacher { get; set; }
     }
 }

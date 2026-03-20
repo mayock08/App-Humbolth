@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus, X, Pencil, Trash2, Save } from 'lucide-react';
+import { BookOpen, Plus, X, Pencil, Trash2, FolderPlus } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
 
 const SubjectManagement = () => {
@@ -27,7 +28,9 @@ const SubjectManagement = () => {
     const fetchSubjects = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://institutohumboldt.mx:8080/api/Courses');
+            const response = await fetch(`${API_BASE_URL}/Courses`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setSubjects(data);
@@ -44,7 +47,9 @@ const SubjectManagement = () => {
 
     const fetchTeachers = async () => {
         try {
-            const response = await fetch('http://institutohumboldt.mx:8080/api/Teachers');
+            const response = await fetch(`${API_BASE_URL}/Teachers`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setTeachers(data);
@@ -56,7 +61,9 @@ const SubjectManagement = () => {
 
     const fetchGrades = async () => {
         try {
-            const response = await fetch('http://institutohumboldt.mx:8080/api/SchoolLevels');
+            const response = await fetch(`${API_BASE_URL}/SchoolLevels`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 // Flatten all grades from all levels
@@ -125,14 +132,17 @@ const SubjectManagement = () => {
             };
 
             const url = editingSubject
-                ? `http://institutohumboldt.mx:8080/api/Courses/${editingSubject.id}`
-                : 'http://institutohumboldt.mx:8080/api/Courses';
+                ? `${API_BASE_URL}/Courses/${editingSubject.id}`
+                : `${API_BASE_URL}/Courses`;
 
             const method = editingSubject ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(editingSubject ? { ...payload, id: editingSubject.id } : payload)
             });
 
@@ -152,8 +162,9 @@ const SubjectManagement = () => {
         if (!window.confirm('¿Está seguro de eliminar esta materia?')) return;
 
         try {
-            const response = await fetch(`http://institutohumboldt.mx:8080/api/Courses/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${API_BASE_URL}/Courses/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
 
             if (response.ok) {

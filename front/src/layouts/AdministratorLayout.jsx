@@ -31,11 +31,19 @@ const AdministratorLayout = ({ children }) => {
         { path: '/class-grouping', icon: Users, label: 'Class Grouping' }, // New from image
         { path: '/coordinators', icon: Users, label: 'Coordinadores' },
         { path: '/schedule', icon: Calendar, label: 'Schedule' }, // New from image
-        { path: '/subjects', icon: FileText, label: 'Subjects' },
+        { path: '/subjects', icon: FileText, label: 'Materias' },
         { path: '/finance', icon: CreditCard, label: 'Finance' },
         { path: '/reports', icon: FileText, label: 'Reports' },
         { path: '/settings', icon: Settings, label: 'Settings' },
     ];
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        window.location.href = '/login'; // Force full reload to clear any memory state
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex font-sans text-gray-800">
@@ -90,7 +98,10 @@ const AdministratorLayout = ({ children }) => {
                     })}
 
                     <div className="pt-4 mt-4 border-t border-gray-50">
-                        <button className="w-full flex items-center px-3 py-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center px-3 py-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200"
+                        >
                             <LogOut size={20} />
                             {sidebarOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
                         </button>

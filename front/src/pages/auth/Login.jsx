@@ -1,19 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import Logo from '../../assets/Logo.png'; // Updated to use the new uploaded logo
+import { API_BASE_URL } from '../../config';
 
 const Login = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const [email, setEmail] = useState('admin@edu.com');
-    const [password, setPassword] = useState('password');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const userId = localStorage.getItem('userId');
+        const hasCompletedIqTest = localStorage.getItem('hasCompletedIqTest'); // Assuming this is stored or needs to be loaded
+
+        if (token && role) {
+            switch (role) {
+                case 'Admin':
+                    navigate('/settings', { replace: true });
+                    break;
+                case 'Teacher':
+                    navigate('/teacher-panel', { replace: true });
+                    break;
+                case 'Student':
+                    // For student, logic might require api call or stored flag. 
+                    // Best effort redirect to dashboard if we don't know about IQ test status from local storage
+                    // Or fetch profile if critical. For now, redirect to dashboard as safe default
+                    navigate('/student-dashboard', { replace: true });
+                    break;
+                default:
+                    navigate('/dashboard', { replace: true });
+            }
+        }
+    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -21,7 +48,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://institutohumboldt.mx:8080/api/Auth/login', {
+            const response = await fetch(`${API_BASE_URL}/Auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -125,15 +152,15 @@ const Login = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Usuario / Correo / Matrícula</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
                                     <Mail size={20} />
                                 </div>
                                 <input
-                                    type="email"
+                                    type="text"
                                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 sm:text-sm"
-                                    placeholder="ejemplo@edu.com"
+                                    placeholder="ejemplo@edu.com o Matrícula"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required

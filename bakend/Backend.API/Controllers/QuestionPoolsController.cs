@@ -30,6 +30,17 @@ namespace Backend.API.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/QuestionPools/course/5
+        [HttpGet("course/{courseId}")]
+        public async Task<ActionResult<IEnumerable<QuestionPool>>> GetPoolsByCourse(long courseId)
+        {
+            return await _context.QuestionPools
+                .Where(p => p.CourseId == courseId)
+                .OrderByDescending(p => p.CreatedAt)
+                .Include(p => p.Questions)
+                .ToListAsync();
+        }
+
         // GET: api/QuestionPools/5
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestionPool>> GetPool(long id)
