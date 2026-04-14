@@ -1,0 +1,31 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# User files
+*.user
+*.suo
+*.userprefs
+
+# NuGet
+**/packages/
+
+# Node
+**/node_modules/
+front/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vs/
+.vscode/
+*.swp
+
+# App Data (fotos, uploads)
+bakend/Backend.API/App_Data/
+
+# Logs
+*.log

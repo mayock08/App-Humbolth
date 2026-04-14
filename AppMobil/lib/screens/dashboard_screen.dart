@@ -8,10 +8,11 @@ import 'activities_screen.dart';
 import 'reports_screen.dart';
 import 'debts_screen.dart';
 import 'admin_chat_screen.dart';
-import 'iq_test_screen.dart';
+import '../services/api_service.dart';
 import '../models/iq_test_model.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
+import 'iq_test_screen.dart';
 import 'login_screen.dart';
 import 'grades_screen.dart';
 
@@ -84,6 +85,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
+    }
+  }
+
+  void _openIqTest() async {
+    if (_currentUser == null) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final ApiService apiService = ApiService();
+      final data = await apiService.getActiveIqTest(_currentUser!.userId);
+      
+      if (mounted) Navigator.pop(context); // hide loading
+
+      if (data != null) {
+        final test = IqTest.fromJson(data);
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => IqTestScreen(test: test)),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No tienes evaluaciones pendientes en este momento.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // hide loading
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al verificar evaluación: $e')),
+        );
+      }
     }
   }
 
@@ -220,6 +261,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       MaterialPageRoute(builder: (context) => const ReportsScreen()),
                     );
                   },
+                ),
+                const SizedBox(height: 12),
+                MenuCard(
+                  icon: Icons.psychology_outlined,
+                  title: 'Psicométrico / Razonamiento',
+                  color: Colors.tealAccent.shade400,
+                  onTap: _openIqTest,
                 ),
                 // Validar Rol 'Parent' o 'Papa' para mostrar Adeudos
                 if (_currentUser?.role == 'Parent' || _currentUser?.role == 'Papa') ...[

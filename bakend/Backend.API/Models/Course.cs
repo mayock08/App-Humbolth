@@ -88,6 +88,12 @@ namespace Backend.API.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Column("formative_field_id")]
+        public int? FormativeFieldId { get; set; }
+
+        [Column("is_complementary")]
+        public bool IsComplementary { get; set; } = false;
+
         // Navigation Properties
         [ForeignKey("TeacherId")]
         public Teacher? Teacher { get; set; }
@@ -97,6 +103,9 @@ namespace Backend.API.Models
 
         [ForeignKey("LevelId")]
         public SchoolLevel? Level { get; set; }
+
+        [ForeignKey("FormativeFieldId")]
+        public FormativeField? FormativeField { get; set; }
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
         public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();

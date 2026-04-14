@@ -1,0 +1,95 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "name": "obtener_informacion_alumnos",
+        "description": "Busca informaci\u00f3n b\u00e1sica de un alumno usando su nombre. Llama esta herramienta pasando 'nombre_alumno' como par\u00e1metro. Devuelve datos como matr\u00edcula, Id interno, etc.",
+        "operation": "executeQuery",
+        "query": "SELECT id, matricula, first_name, paternal_surname, email, group_id FROM public.students WHERE first_name ILIKE '%' || '{{ $parameter.nombre_alumno }}' || '%' OR paternal_surname ILIKE '%' || '{{ $parameter.nombre_alumno }}' || '%' LIMIT 20;"
+      },
+      "id": "t1e1a2b2",
+      "name": "Tool: Info Alumnos",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [200, 200]
+    },
+    {
+      "parameters": {
+        "name": "obtener_maestros",
+        "description": "Obtiene la lista de docentes y sus t\u00edtulos profesionales. Se puede pasar 'nombre_maestro' de manera opcional.",
+        "operation": "executeQuery",
+        "query": "SELECT id, full_name, email, professional_title FROM public.teachers WHERE full_name ILIKE '%' || '{{ $parameter.nombre_maestro }}' || '%' LIMIT 20;"
+      },
+      "id": "t2e2a2b2",
+      "name": "Tool: Info Maestros",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [200, 350]
+    },
+    {
+      "parameters": {
+        "name": "obtener_materias_y_normativa",
+        "description": "Consulta las materias de la escuela y bajo qu\u00e9 Campo Formativo de la SEP est\u00e1n catalogadas. Pasa 'nombre_materia' como par\u00e1metro.",
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.name, c.grade, c.group, f.name as formative_field FROM public.courses c LEFT JOIN public.formative_fields f ON c.formative_field_id = f.id WHERE c.name ILIKE '%' || '{{ $parameter.nombre_materia }}' || '%' LIMIT 50;"
+      },
+      "id": "t3e3a2b2",
+      "name": "Tool: Materias y SEP",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [200, 500]
+    },
+    {
+      "parameters": {
+        "name": "obtener_calificaciones_alumno",
+        "description": "Obtiene las calificaciones y expedientes num\u00e9ricos de un alumno. Pasa el 'student_id' como par\u00e1metro para consultar.",
+        "operation": "executeQuery",
+        "query": "SELECT ev.title, ev.max_score, e.score, e.graded_at FROM public.student_course_evaluations e INNER JOIN public.course_evaluations ev ON e.evaluation_id = ev.id WHERE e.student_id = {{ $parameter.student_id }} LIMIT 50;"
+      },
+      "id": "t4e4a2b2",
+      "name": "Tool: Calificaciones",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [400, 200]
+    },
+    {
+      "parameters": {
+        "name": "obtener_asistencias_alumno",
+        "description": "Consulta el registro de faltas o asistencias de un alumno mediante su 'student_id'.",
+        "operation": "executeQuery",
+        "query": "SELECT date, status, notes FROM public.attendance_registries WHERE student_id = {{ $parameter.student_id }} ORDER BY date DESC LIMIT 30;"
+      },
+      "id": "t5e5a2b2",
+      "name": "Tool: Asistencias",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [400, 350]
+    },
+    {
+      "parameters": {
+        "name": "obtener_reactivos_examenes",
+        "description": "Consulta el banco de ex\u00e1menes y reactivos para que los profesores puedan redactar o auditar evaluaciones. Pasa 'tema_examen'.",
+        "operation": "executeQuery",
+        "query": "SELECT p.name as pool_name, q.question_text, q.question_type FROM public.question_pools p INNER JOIN public.questions q ON p.id = q.pool_id WHERE p.name ILIKE '%' || '{{ $parameter.tema_examen }}' || '%' LIMIT 30;"
+      },
+      "id": "t6e6a2b2",
+      "name": "Tool: Banco de Examenes",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [400, 500]
+    },
+    {
+      "parameters": {
+        "name": "obtener_deudas_alumno",
+        "description": "Consulta el estatus financiero y pagos pendientes o completados de un alumno pasando su 'student_id'.",
+        "operation": "executeQuery",
+        "query": "SELECT concept, amount, due_date, status, reference FROM public.debts WHERE student_id = {{ $parameter.student_id }} LIMIT 20;"
+      },
+      "id": "t7e7a2b2",
+      "name": "Tool: Deudas Finanzas",
+      "type": "@n8n/n8n-nodes-langchain.toolPostgres",
+      "typeVersion": 1,
+      "position": [600, 200]
+    }
+  ]
+}

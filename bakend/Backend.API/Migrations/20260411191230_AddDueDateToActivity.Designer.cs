@@ -3,6 +3,7 @@ using System;
 using Backend.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.API.Migrations
 {
     [DbContext(typeof(SupabaseDbContext))]
-    partial class SupabaseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411191230_AddDueDateToActivity")]
+    partial class AddDueDateToActivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1037,11 +1040,6 @@ namespace Backend.API.Migrations
                     b.Property<int?>("PeriodId")
                         .HasColumnType("integer")
                         .HasColumnName("period_id");
-
-                    b.Property<string>("TargetSkill")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("target_skill");
 
                     b.Property<int>("TotalTimeMinutes")
                         .HasColumnType("integer")

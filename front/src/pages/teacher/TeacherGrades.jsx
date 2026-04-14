@@ -8,6 +8,7 @@ const TeacherGrades = () => {
     const location = useLocation();
     const [activePeriod, setActivePeriod] = useState(null);
     const [courses, setCourses] = useState([]);
+    const [formativeFields, setFormativeFields] = useState([]);
 
 
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -34,6 +35,12 @@ const TeacherGrades = () => {
             if (periodRes.ok) {
                 currentPeriod = await periodRes.json();
                 setActivePeriod(currentPeriod);
+            }
+
+            // Fetch Formative Fields
+            const fieldsRes = await fetch(`${API_BASE_URL}/FormativeFields`);
+            if (fieldsRes.ok) {
+                setFormativeFields(await fieldsRes.json());
             }
 
             // 2. Fetch Teacher Courses
@@ -292,11 +299,23 @@ const TeacherGrades = () => {
                         className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm appearance-none"
                     >
                         <option value="">-- Seleccione una Materia --</option>
-                        {courses.map(course => (
-                            <option key={course.id} value={course.id}>
-                                {course.name} ({course.grade} - {course.group})
-                            </option>
-                        ))}
+                        {
+                            Object.entries(courses.reduce((acc, course) => {
+                                const fieldInfo = formativeFields.find(f => f.id === course.formativeFieldId);
+                                const groupName = fieldInfo ? fieldInfo.name : 'Independiente / Extracurricular';
+                                if (!acc[groupName]) acc[groupName] = [];
+                                acc[groupName].push(course);
+                                return acc;
+                            }, {})).map(([groupName, groupCourses]) => (
+                                <optgroup key={groupName} label={groupName}>
+                                    {groupCourses.map(course => (
+                                        <option key={course.id} value={course.id}>
+                                            {course.isComplementary ? '*' : ''} {course.name} ({course.grade} - {course.group})
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            ))
+                        }
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                         <ChevronDown size={16} />

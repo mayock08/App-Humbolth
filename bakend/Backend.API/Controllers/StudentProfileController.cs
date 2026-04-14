@@ -151,5 +151,76 @@ namespace Backend.API.Controllers
 
             return Ok(students);
         }
+
+        // GET: api/StudentProfile/{studentId}/activities
+        [HttpGet("{studentId}/activities")]
+        public async Task<ActionResult<IEnumerable<object>>> GetStudentActivities(long studentId)
+        {
+            var enrollments = await _context.Enrollments
+                .Include(e => e.Course)
+                .Where(e => e.StudentId == studentId)
+                .ToListAsync();
+
+            var courseIds = enrollments.Select(e => e.CourseId).ToList();
+
+            // Fetch CourseTasks (Tareas, Proyectos)
+            var courseTasks = await _context.CourseTasks
+                .Include(ct => ct.Course)
+                .Include(ct => ct.Submissions.Where(s => s.StudentId == studentId))
+                .Where(ct => courseIds.Contains(ct.CourseId))
+                .ToListAsync();
+
+            // Fetch Activities (Exámenes Interactivos)
+            var activities = await _context.Activities
+                .Include(a => a.Course)
+                .Include(a => a.StudentActivities.Where(sa => sa.StudentId == studentId))
+                .Where(a => a.CourseId.HasValue && courseIds.Contains(a.CourseId.Value))
+                .ToListAsync();
+
+            var unifiedList = new List<object>();
+
+            foreach (var ct in courseTasks)
+            {
+                var submission = ct.Submissions.FirstOrDefault();
+                unifiedList.Add(new
+                {
+                    id = $"task-{ct.Id}",
+                    courseId = ct.CourseId,
+                    courseName = ct.Course?.Name,
+                    title = ct.Title,
+                    description = ct.Description,
+                    dueDate = ct.DueDate ?? ct.CreatedAt.AddDays(7),
+                    type = ct.SubmissionType == "FileUpload" ? "Tarea" : 
+                           (ct.SubmissionType == "Project" ? "Proyecto" : "Tarea"),
+                    status = submission != null ? 
+                             (submission.Status == "GRADED" ? "Calificado" : 
+                              (submission.Status == "SUBMITTED" ? "En progreso" : "Pendiente")) 
+                             : "Pendiente",
+                    grade = submission?.Grade
+                });
+            }
+
+            foreach (var a in activities)
+            {
+                var studentActivity = a.StudentActivities.FirstOrDefault();
+                unifiedList.Add(new
+                {
+                    id = $"exam-{a.Id}",
+                    courseId = a.CourseId,
+                    courseName = a.Course?.Name,
+                    title = a.Title,
+                    description = a.Description,
+                    dueDate = a.DueDate ?? a.CreatedAt.AddDays(7),
+                    type = a.ActivityType ?? "Examen",
+                    status = studentActivity != null ? 
+                             (studentActivity.Status == "GRADED" ? "Calificado" : 
+                              (studentActivity.Status == "SUBMITTED" ? "En progreso" : "Pendiente")) 
+                             : "Pendiente",
+                    grade = studentActivity?.FinalGrade
+                });
+            }
+
+            return Ok(unifiedList.OrderBy(u => ((dynamic)u).dueDate));
+        }
     }
 }

@@ -33,12 +33,22 @@ namespace Backend.API.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Column("due_date")]
+        public DateTime? DueDate { get; set; }
+
         [Column("period_id")]
         public int? PeriodId { get; set; }
+
+        [Column("course_id")]
+        public long? CourseId { get; set; }
 
         // Navigation Properties
         [ForeignKey("PeriodId")]
         public SchoolPeriod? Period { get; set; }
+        
+        [ForeignKey("CourseId")]
+        public Course? Course { get; set; }
+
         [ForeignKey("TeacherId")]
         public Teacher? Teacher { get; set; }
 

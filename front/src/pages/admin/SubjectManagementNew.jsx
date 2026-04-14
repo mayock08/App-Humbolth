@@ -22,6 +22,7 @@ const SubjectManagementNew = () => {
     const [courses, setCourses] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [levels, setLevels] = useState([]); // Levels -> Grades -> Groups
+    const [formativeFields, setFormativeFields] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Filter State
@@ -47,6 +48,8 @@ const SubjectManagementNew = () => {
         levelId: '', // To filter grades dropdown
         gradeId: '', // Specific grade selected (e.g. 1st Grade)
         teacherId: '',
+        formativeFieldId: '',
+        isComplementary: false,
         selectedGroups: [], // Array of strings "GradeName|GroupName" e.g. "1A", "1B"
         scheduleDays: [], // ['L', 'M', 'Mi', 'J', 'V']
         startTime: '08:00',
@@ -62,15 +65,17 @@ const SubjectManagementNew = () => {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const [coursesRes, teachersRes, levelsRes] = await Promise.all([
+            const [coursesRes, teachersRes, levelsRes, fieldsRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/Courses`),
                 fetch(`${API_BASE_URL}/Teachers`),
-                fetch(`${API_BASE_URL}/SchoolLevels`)
+                fetch(`${API_BASE_URL}/SchoolLevels`),
+                fetch(`${API_BASE_URL}/FormativeFields`)
             ]);
 
             if (coursesRes.ok) setCourses(await coursesRes.json());
             if (teachersRes.ok) setTeachers(await teachersRes.json());
             if (levelsRes.ok) setLevels(await levelsRes.json());
+            if (fieldsRes.ok) setFormativeFields(await fieldsRes.json());
 
         } catch (err) {
             console.error("Error loading data:", err);
@@ -166,6 +171,8 @@ const SubjectManagementNew = () => {
                 levelId: course.levelId || '', // Use explicit LevelId if available
                 gradeId: '',
                 teacherId: course.teacherId,
+                formativeFieldId: course.formativeFieldId || '',
+                isComplementary: course.isComplementary || false,
                 selectedGroups: [],
                 scheduleDays: course.scheduleDays ? course.scheduleDays.split(',') : [],
                 startTime: course.startTime || '08:00',
@@ -226,6 +233,8 @@ const SubjectManagementNew = () => {
                 credits: creditsVal,
                 teacherId: teacherIdVal,
                 levelId: levelIdVal, // Include LevelId
+                formativeFieldId: formData.formativeFieldId ? parseInt(formData.formativeFieldId) : null,
+                isComplementary: formData.isComplementary,
                 scheduleDays: formData.scheduleDays.join(','),
                 startTime: formatTimePayload(formData.startTime),
                 endTime: formatTimePayload(formData.endTime),
@@ -254,6 +263,8 @@ const SubjectManagementNew = () => {
                     credits: creditsVal,
                     teacherId: teacherIdVal,
                     levelId: levelIdVal, // Include LevelId
+                    formativeFieldId: formData.formativeFieldId ? parseInt(formData.formativeFieldId) : null,
+                    isComplementary: formData.isComplementary,
                     scheduleDays: formData.scheduleDays.join(','),
                     startTime: formatTimePayload(formData.startTime),
                     endTime: formatTimePayload(formData.endTime),
@@ -556,6 +567,33 @@ const SubjectManagementNew = () => {
                                                 <option key={l.id} value={l.id}>{l.name}</option>
                                             ))}
                                         </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Campo Formativo</label>
+                                            <select
+                                                value={formData.formativeFieldId}
+                                                onChange={(e) => setFormData({ ...formData, formativeFieldId: e.target.value })}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none bg-white"
+                                            >
+                                                <option value="">Independiente / Sin campo...</option>
+                                                {formativeFields.map(f => (
+                                                    <option key={f.id} value={f.id}>{f.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center mt-6">
+                                            <input
+                                                type="checkbox"
+                                                id="isComplementary"
+                                                checked={formData.isComplementary}
+                                                onChange={(e) => setFormData({ ...formData, isComplementary: e.target.checked })}
+                                                className="w-4 h-4 text-blue-600 rounded border-gray-300"
+                                            />
+                                            <label htmlFor="isComplementary" className="ml-2 text-sm text-gray-700">
+                                                Materia Complementaria
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </section>

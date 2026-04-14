@@ -25,6 +25,10 @@ namespace Backend.API.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Column("target_skill")]
+        [MaxLength(50)]
+        public string? TargetSkill { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

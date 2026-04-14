@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Users, BookOpen, School, Sparkles } from 'lucide-react';
+import { UserPlus, Users, BookOpen, School, Sparkles, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const SettingsCard = ({ icon: Icon, title, description, to, color = "bg-blue-500" }) => (
@@ -55,6 +55,13 @@ const Settings = () => {
                     description="Consulta con inteligencia artificial sobre estudiantes y gestión escolar."
                     to="/ai-panel"
                     color="bg-purple-500"
+                />
+                <SettingsCard
+                    icon={Mail}
+                    title="Configuración SMTP"
+                    description="Servidor de correos para el envío masivo de notificaciones y fichas."
+                    to="/settings/smtp"
+                    color="bg-sky-500"
                 />
             </div>
         </div>

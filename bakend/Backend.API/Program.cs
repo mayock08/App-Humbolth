@@ -66,7 +66,8 @@ builder.Services.AddAuthentication(options =>
 
 // Register Services
 builder.Services.AddScoped<Backend.API.Services.IDebtService, Backend.API.Services.MockDebtService>();
-
+builder.Services.AddScoped<Backend.API.Services.IPdfReportService, Backend.API.Services.PdfReportService>();
+builder.Services.AddScoped<Backend.API.Services.IEmailService, Backend.API.Services.EmailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

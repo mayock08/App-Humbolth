@@ -18,12 +18,13 @@ namespace Backend.API.Controllers
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourses([FromQuery] int? periodId = null, [FromQuery] long? teacherId = null)
+        public async Task<ActionResult<IEnumerable<Course>>> GetCourses([FromQuery] int? periodId = null, [FromQuery] long? teacherId = null, [FromQuery] int? formativeFieldId = null)
         {
             var query = _context.Courses
                 .Include(c => c.Teacher)
                 .Include(c => c.Period)
                 .Include(c => c.Level)
+                .Include(c => c.FormativeField)
                 .Include(c => c.GradingCriteria)
                 .AsQueryable();
 
@@ -37,6 +38,11 @@ namespace Backend.API.Controllers
                 query = query.Where(c => c.TeacherId == teacherId);
             }
 
+            if (formativeFieldId.HasValue)
+            {
+                query = query.Where(c => c.FormativeFieldId == formativeFieldId);
+            }
+
             return await query.ToListAsync();
         }
 
@@ -47,6 +53,7 @@ namespace Backend.API.Controllers
             var course = await _context.Courses
                 .Include(c => c.Teacher)
                 .Include(c => c.Level)
+                .Include(c => c.FormativeField)
                 .Include(c => c.GradingCriteria)
                     .ThenInclude(gc => gc.Evaluations)
                 .Include(c => c.Enrollments)
@@ -99,6 +106,8 @@ namespace Backend.API.Controllers
             existingCourse.EndTime = course.EndTime;
             existingCourse.PeriodId = course.PeriodId;
             existingCourse.LevelId = course.LevelId;
+            existingCourse.FormativeFieldId = course.FormativeFieldId;
+            existingCourse.IsComplementary = course.IsComplementary;
             // distinct from created_at which should remain unchanged
 
             try

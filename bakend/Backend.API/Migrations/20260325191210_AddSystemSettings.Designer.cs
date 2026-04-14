@@ -3,6 +3,7 @@ using System;
 using Backend.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.API.Migrations
 {
     [DbContext(typeof(SupabaseDbContext))]
-    partial class SupabaseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260325191210_AddSystemSettings")]
+    partial class AddSystemSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,10 +39,6 @@ namespace Backend.API.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("activity_type");
 
-                    b.Property<long?>("CourseId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("course_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
@@ -47,10 +46,6 @@ namespace Backend.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
-
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("due_date");
 
                     b.Property<bool>("IsPublished")
                         .HasColumnType("boolean")
@@ -71,8 +66,6 @@ namespace Backend.API.Migrations
                         .HasColumnName("title");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
 
                     b.HasIndex("PeriodId");
 
@@ -361,19 +354,11 @@ namespace Backend.API.Migrations
                         .HasColumnType("interval")
                         .HasColumnName("end_time");
 
-                    b.Property<int?>("FormativeFieldId")
-                        .HasColumnType("integer")
-                        .HasColumnName("formative_field_id");
-
                     b.Property<string>("Grade")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("grade");
-
-                    b.Property<bool>("IsComplementary")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_complementary");
 
                     b.Property<int?>("LevelId")
                         .HasColumnType("integer")
@@ -402,8 +387,6 @@ namespace Backend.API.Migrations
                         .HasColumnName("teacher_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FormativeFieldId");
 
                     b.HasIndex("LevelId");
 
@@ -623,38 +606,6 @@ namespace Backend.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("families", "public");
-                });
-
-            modelBuilder.Entity("Backend.API.Models.FormativeField", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsOfficial")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_official");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("formative_fields", "public");
                 });
 
             modelBuilder.Entity("Backend.API.Models.Guardian", b =>
@@ -1037,11 +988,6 @@ namespace Backend.API.Migrations
                     b.Property<int?>("PeriodId")
                         .HasColumnType("integer")
                         .HasColumnName("period_id");
-
-                    b.Property<string>("TargetSkill")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("target_skill");
 
                     b.Property<int>("TotalTimeMinutes")
                         .HasColumnType("integer")
@@ -2512,10 +2458,6 @@ namespace Backend.API.Migrations
 
             modelBuilder.Entity("Backend.API.Models.Activity", b =>
                 {
-                    b.HasOne("Backend.API.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId");
-
                     b.HasOne("Backend.API.Models.SchoolPeriod", "Period")
                         .WithMany()
                         .HasForeignKey("PeriodId");
@@ -2523,8 +2465,6 @@ namespace Backend.API.Migrations
                     b.HasOne("Backend.API.Models.Teacher", "Teacher")
                         .WithMany("Activities")
                         .HasForeignKey("TeacherId");
-
-                    b.Navigation("Course");
 
                     b.Navigation("Period");
 
@@ -2622,10 +2562,6 @@ namespace Backend.API.Migrations
 
             modelBuilder.Entity("Backend.API.Models.Course", b =>
                 {
-                    b.HasOne("Backend.API.Models.FormativeField", "FormativeField")
-                        .WithMany("Courses")
-                        .HasForeignKey("FormativeFieldId");
-
                     b.HasOne("Backend.API.Models.SchoolLevel", "Level")
                         .WithMany()
                         .HasForeignKey("LevelId");
@@ -2637,8 +2573,6 @@ namespace Backend.API.Migrations
                     b.HasOne("Backend.API.Models.Teacher", "Teacher")
                         .WithMany("Courses")
                         .HasForeignKey("TeacherId");
-
-                    b.Navigation("FormativeField");
 
                     b.Navigation("Level");
 
@@ -3216,11 +3150,6 @@ namespace Backend.API.Migrations
             modelBuilder.Entity("Backend.API.Models.Family", b =>
                 {
                     b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("Backend.API.Models.FormativeField", b =>
-                {
-                    b.Navigation("Courses");
                 });
 
             modelBuilder.Entity("Backend.API.Models.Guardian", b =>

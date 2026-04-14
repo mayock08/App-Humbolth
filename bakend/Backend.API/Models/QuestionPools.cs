@@ -75,6 +75,6 @@ namespace Backend.API.Models
 
         // Navigation Properties
         [ForeignKey("PoolId")]
-        public QuestionPool Pool { get; set; } = null!;
+        public QuestionPool? Pool { get; set; }
     }
 }

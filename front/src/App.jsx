@@ -17,17 +17,22 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ClassGrouping from './pages/admin/ClassGrouping';
 import ScheduleBuilder from './pages/admin/ScheduleBuilder';
 import Settings from './pages/admin/Settings';
+import SMTPConfig from './pages/admin/SMTPConfig';
 import AddStudent from './pages/admin/AddStudent';
 import TeacherManagement from './pages/admin/TeacherManagement';
 import SchoolPeriods from './pages/admin/SchoolPeriods';
 import SubjectManagement from './pages/admin/SubjectManagementNew';
 import SubjectProfile from './pages/admin/SubjectProfile';
+import FormativeFields from './pages/admin/FormativeFields';
 import FinanceDashboard from './pages/admin/FinanceDashboard';
 import MobileAccess from './pages/admin/MobileAccess';
 import StudentsList from './pages/admin/StudentsList';
 import Admissions from './pages/admin/Admissions';
 import ReportsMenu from './pages/admin/ReportsMenu';
 import ClassListReport from './pages/admin/ClassListReport';
+import StudyPlans from './pages/admin/StudyPlans';
+import GradeReports from './pages/admin/GradeReports';
+import IqTestConfig from './pages/admin/IqTestConfig';
 
 // Teacher
 // Teacher
@@ -77,18 +82,23 @@ function App() {
           <Route path="/class-grouping" element={<ProtectedRoute><AdministratorLayout><ClassGrouping /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><AdministratorLayout><ScheduleBuilder /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><AdministratorLayout><Settings /></AdministratorLayout></ProtectedRoute>} />
+          <Route path="/settings/smtp" element={<ProtectedRoute><AdministratorLayout><SMTPConfig /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/add-student" element={<ProtectedRoute><AdministratorLayout><AddStudent /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/teachers" element={<ProtectedRoute><AdministratorLayout><TeacherManagement /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/school-periods" element={<ProtectedRoute><AdministratorLayout><SchoolPeriods /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/subjects" element={<ProtectedRoute><AdministratorLayout><SubjectManagement /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/subjects/new" element={<ProtectedRoute><AdministratorLayout><SubjectProfile /></AdministratorLayout></ProtectedRoute>} />
+          <Route path="/formative-fields" element={<ProtectedRoute><AdministratorLayout><FormativeFields /></AdministratorLayout></ProtectedRoute>} />
+          <Route path="/study-plans" element={<ProtectedRoute><AdministratorLayout><StudyPlans /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/finance" element={<ProtectedRoute><AdministratorLayout><FinanceDashboard /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/mobile-access" element={<ProtectedRoute><AdministratorLayout><MobileAccess /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/students" element={<ProtectedRoute><AdministratorLayout><StudentsList /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/admissions" element={<ProtectedRoute><AdministratorLayout><Admissions /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/coordinators" element={<ProtectedRoute><AdministratorLayout><CoordinatorAdmin /></AdministratorLayout></ProtectedRoute>} />
+          <Route path="/iq-config" element={<ProtectedRoute><AdministratorLayout><IqTestConfig /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><AdministratorLayout><ReportsMenu /></AdministratorLayout></ProtectedRoute>} />
           <Route path="/reports/class-lists" element={<ProtectedRoute><AdministratorLayout><ClassListReport /></AdministratorLayout></ProtectedRoute>} />
+          <Route path="/reports/grades" element={<ProtectedRoute><AdministratorLayout><GradeReports /></AdministratorLayout></ProtectedRoute>} />
 
           {/* Teacher */}
           <Route path="/teacher-panel" element={<ProtectedRoute><TeacherLayout><TeacherDashboard /></TeacherLayout></ProtectedRoute>} />

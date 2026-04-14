@@ -115,7 +115,9 @@ namespace Backend.API.Controllers
                 Description = request.Description ?? pool.Description, // Default to pool desc if null
                 ActivityType = "Examen", // Enforcing type
                 TeacherId = pool.TeacherId,
+                CourseId = request.CourseId ?? pool.CourseId, // Assign CourseId from request or fallback to pool's course
                 IsPublished = false,
+                DueDate = request.DueDate,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -255,5 +257,6 @@ namespace Backend.API.Controllers
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime DueDate { get; set; }
+        public long? CourseId { get; set; }
     }
 }

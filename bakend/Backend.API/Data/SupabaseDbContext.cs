@@ -21,6 +21,7 @@ namespace Backend.API.Data
         public DbSet<SchoolGrade> SchoolGrades { get; set; }
         public DbSet<SchoolGroup> SchoolGroups { get; set; }
         public DbSet<SchoolPeriod> SchoolPeriods { get; set; }
+        public DbSet<FormativeField> FormativeFields { get; set; }
         
         // PlanStuding
         public DbSet<PlanStuding> PlanStudings { get; set; }
@@ -88,6 +89,9 @@ namespace Backend.API.Data
         // Notifications
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<IqTestGroup> IqTestGroups { get; set; }
+
+        // Settings
+        public DbSet<SystemSetting> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -47,6 +47,17 @@ namespace Backend.API.Controllers
             return iqTest;
         }
 
+        // GET: api/IqTests/{testId}/assignments
+        [HttpGet("{testId}/assignments")]
+        public async Task<ActionResult<IEnumerable<IqTestGroup>>> GetTestAssignments(long testId)
+        {
+            var assignments = await _context.IqTestGroups
+                .Where(tg => tg.TestId == testId)
+                .ToListAsync();
+
+            return Ok(assignments);
+        }
+
         // POST: api/IqTests
         [HttpPost]
         public async Task<ActionResult<IqTest>> PostIqTest(IqTest iqTest)
@@ -253,6 +264,57 @@ namespace Backend.API.Controllers
 
             return Ok(newAttempt);
         }
+        // POST: api/IqTests/{id}/import-questions
+        [HttpPost("{id}/import-questions")]
+        public async Task<IActionResult> ImportQuestions(long id, [FromBody] AiImportTestDto aiTest)
+        {
+            var test = await _context.IqTests.Include(t => t.Sections).FirstOrDefaultAsync(t => t.Id == id);
+            if (test == null) return NotFound("Exam not found");
+
+            foreach (var aiSection in aiTest.sections)
+            {
+                var section = new IqSection
+                {
+                    TestId = id,
+                    Name = aiSection.name,
+                    OrderIndex = test.Sections.Count + 1,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.IqSections.Add(section);
+
+                int qIndex = 1;
+                foreach (var aiQuestion in aiSection.questions)
+                {
+                    var question = new IqQuestion
+                    {
+                        Section = section,
+                        Text = aiQuestion.text,
+                        Difficulty = aiQuestion.difficulty,
+                        AbilityDomain = aiQuestion.abilityDomain ?? test.TargetSkill ?? "General",
+                        OrderIndex = qIndex++,
+                        Score = 1, // Standard score for auto-generated
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.IqQuestions.Add(question);
+
+                    foreach (var aiOption in aiQuestion.options)
+                    {
+                        var option = new IqOption
+                        {
+                            Question = question,
+                            OptionKey = aiOption.optionKey,
+                            Text = aiOption.text,
+                            IsCorrect = aiOption.isCorrect,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.IqOptions.Add(option);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Questions imported successfully." });
         }
     }
 
@@ -278,3 +340,30 @@ namespace Backend.API.Controllers
         public long QuestionId { get; set; }
         public long SelectedOptionId { get; set; }
     }
+
+    public class AiImportTestDto
+    {
+        public List<AiImportSectionDto> sections { get; set; } = new List<AiImportSectionDto>();
+    }
+
+    public class AiImportSectionDto
+    {
+        public string name { get; set; } = string.Empty;
+        public List<AiImportQuestionDto> questions { get; set; } = new List<AiImportQuestionDto>();
+    }
+
+    public class AiImportQuestionDto
+    {
+        public string text { get; set; } = string.Empty;
+        public int difficulty { get; set; } = 1;
+        public string abilityDomain { get; set; } = string.Empty;
+        public List<AiImportOptionDto> options { get; set; } = new List<AiImportOptionDto>();
+    }
+
+    public class AiImportOptionDto
+    {
+        public string optionKey { get; set; } = string.Empty;
+        public string text { get; set; } = string.Empty;
+        public bool isCorrect { get; set; }
+    }
+}

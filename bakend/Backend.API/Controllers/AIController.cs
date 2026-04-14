@@ -117,6 +117,110 @@ namespace Backend.API.Controllers
                 response = $"Análisis del estudiante {request.StudentId}: Esta funcionalidad estará disponible próximamente con integración completa de IA."
             });
         }
+
+        // POST: api/AI/generate-iq-questions
+        [HttpPost("generate-iq-questions")]
+        public async Task<ActionResult<object>> GenerateIqQuestions([FromBody] GenerateIqRequest request)
+        {
+            try
+            {
+                var aiEndpoint = _configuration["AI:Endpoint"];
+                var aiApiKey = _configuration["AI:ApiKey"];
+                var aiModel = _configuration["AI:Model"] ?? "gpt-3.5-turbo";
+
+                if (string.IsNullOrEmpty(aiEndpoint) || string.IsNullOrEmpty(aiApiKey))
+                {
+                    // Return a mock payload so the UI can be tested without a real API Key
+                    var mockResponse = new {
+                        sections = new[] {
+                            new { 
+                                name = $"Sección Práctica de {request.TargetSkill}",
+                                questions = new[] {
+                                    new {
+                                        text = $"[Autogenerado - Falta API Key] ¿Ejemplo de pregunta lógica sobre {request.TargetSkill} nivel {request.Difficulty}?",
+                                        difficulty = 2,
+                                        abilityDomain = request.TargetSkill,
+                                        options = new[] {
+                                            new { optionKey = "A", text = "Opción incorrecta 1", isCorrect = false },
+                                            new { optionKey = "B", text = "Opción incorrecta 2", isCorrect = false },
+                                            new { optionKey = "C", text = "Opción correcta de análisis", isCorrect = true },
+                                            new { optionKey = "D", text = "Opción incorrecta 3", isCorrect = false }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    return Ok(mockResponse);
+                }
+
+                var extraContext = string.IsNullOrWhiteSpace(request.CustomPrompt) ? "" : $"\n\nCONTEXTO TEMÁTICO/PERFIL (Obligatorio aplicar esto al tono de las preguntas): {request.CustomPrompt}";
+                var prompt = $@"Eres un psicómetra educativo experto. Tu objetivo es generar reactivos para un examen de {request.TargetSkill} adaptado para estudiantes de nivel {request.EducationalLevel}. El nivel de dificultad debe ser {request.Difficulty}. Genera {request.Count} preguntas de opción múltiple con 4 opciones.{extraContext}
+
+DEVUELVE ÚNICAMENTE UN ARCHIVO JSON VÁLIDO con esta estructura:
+{{
+  ""sections"": [
+    {{
+      ""name"": ""Sección {request.TargetSkill}"",
+      ""questions"": [
+        {{
+          ""text"": ""¿Cuestión lógica...?"",
+          ""difficulty"": 2,
+          ""abilityDomain"": ""{request.TargetSkill}"",
+          ""options"": [
+            {{ ""optionKey"": ""A"", ""text"": ""Resp 1"", ""isCorrect"": false }},
+            {{ ""optionKey"": ""B"", ""text"": ""Resp 2"", ""isCorrect"": true }}
+          ]
+        }}
+      ]
+    }}
+  ]
+}}";
+
+                var aiRequest = new
+                {
+                    model = aiModel,
+                    response_format = new { type = "json_object" },
+                    messages = new[]
+                    {
+                        new { role = "system", content = "Eres un asistente de psicología educativa que responde ÚNICAMENTE en JSON válido sin formato markdown extra." },
+                        new { role = "user", content = prompt }
+                    },
+                    temperature = 0.7
+                };
+
+                var client = _httpClientFactory.CreateClient();
+                if (!string.IsNullOrEmpty(aiApiKey))
+                {
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {aiApiKey}");
+                }
+
+                var jsonContent = JsonSerializer.Serialize(aiRequest);
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(aiEndpoint, httpContent);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var aiResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                    var messageContent = aiResponse.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+                    
+                    if (messageContent != null)
+                    {
+                        // Return the raw parsed JSON so frontend can use it directly
+                        var parsedResult = JsonSerializer.Deserialize<JsonElement>(messageContent);
+                        return Ok(parsedResult);
+                    }
+                }
+                
+                return StatusCode(500, new { error = "Error desde el servicio AI.", details = responseContent });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Ocurrió un error al procesar:", details = ex.Message });
+            }
+        }
     }
 
     public class ChatRequest
@@ -128,5 +232,14 @@ namespace Backend.API.Controllers
     {
         public long StudentId { get; set; }
         public string? Context { get; set; }
+    }
+
+    public class GenerateIqRequest
+    {
+        public string TargetSkill { get; set; } = "General";
+        public string Difficulty { get; set; } = "Media";
+        public int Count { get; set; } = 5;
+        public string EducationalLevel { get; set; } = "Primaria";
+        public string? CustomPrompt { get; set; }
     }
 }

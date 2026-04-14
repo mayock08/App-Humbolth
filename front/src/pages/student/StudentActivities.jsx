@@ -18,71 +18,31 @@ const StudentActivities = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/StudentProfile/${userId}`, {
+            // First fetch the student's courses to populate course filters (optional, but good for the dropdown)
+            const profileRes = await fetch(`${API_BASE_URL}/StudentProfile/${userId}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
-            if (response.ok) {
-                const data = await response.json();
+            if (profileRes.ok) {
+                const data = await profileRes.json();
                 setCourses(data.courses || []);
-                // Generate mock activities for all courses
-                generateMockActivities(data.courses || []);
+            }
+
+            // Next fetch unified activities and tasks
+            const activitiesRes = await fetch(`${API_BASE_URL}/StudentProfile/${userId}/activities`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (activitiesRes.ok) {
+                const activitiesData = await activitiesRes.json();
+                setActivities(activitiesData);
             }
         } catch (err) {
             console.error('Error fetching data:', err);
-            // Use mock data
-            const mockCourses = [
-                { id: 1, name: 'Matemáticas', teacher: 'Prof. García' },
-                { id: 2, name: 'Español', teacher: 'Prof. Martínez' },
-                { id: 3, name: 'Ciencias', teacher: 'Prof. López' }
-            ];
-            setCourses(mockCourses);
-            generateMockActivities(mockCourses);
         } finally {
             setLoading(false);
         }
     };
 
-    const generateMockActivities = (coursesList) => {
-        const mockActivities = [];
-        coursesList.forEach((course, idx) => {
-            mockActivities.push(
-                {
-                    id: `${course.id}-1`,
-                    courseId: course.id,
-                    courseName: course.name,
-                    title: 'Tarea: Resolver ejercicios',
-                    description: `Completar los ejercicios del capítulo ${idx + 1}`,
-                    dueDate: new Date(Date.now() + (idx + 1) * 86400000).toISOString(),
-                    type: 'Tarea',
-                    status: 'Pendiente',
-                    grade: null
-                },
-                {
-                    id: `${course.id}-2`,
-                    courseId: course.id,
-                    courseName: course.name,
-                    title: 'Examen: Unidad 2',
-                    description: 'Examen sobre los temas de la unidad 2',
-                    dueDate: new Date(Date.now() + (idx + 3) * 86400000).toISOString(),
-                    type: 'Examen',
-                    status: idx === 0 ? 'Calificado' : 'Pendiente',
-                    grade: idx === 0 ? 9.5 : null
-                },
-                {
-                    id: `${course.id}-3`,
-                    courseId: course.id,
-                    courseName: course.name,
-                    title: 'Proyecto: Investigación',
-                    description: 'Proyecto de investigación en equipos',
-                    dueDate: new Date(Date.now() + (idx + 7) * 86400000).toISOString(),
-                    type: 'Proyecto',
-                    status: 'En progreso',
-                    grade: null
-                }
-            );
-        });
-        setActivities(mockActivities);
-    };
+    // Mock generation removed for production data integration
 
     const getActivityIcon = (type) => {
         switch (type) {

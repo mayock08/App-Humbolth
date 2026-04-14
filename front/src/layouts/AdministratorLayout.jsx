@@ -14,7 +14,8 @@ import {
     Bell,
     ChevronDown,
     CreditCard,
-    Smartphone as SmartphoneIcon
+    Smartphone as SmartphoneIcon,
+    BookOpen
 } from 'lucide-react';
 import Logo from '../assets/Logo.png';
 
@@ -31,7 +32,9 @@ const AdministratorLayout = ({ children }) => {
         { path: '/class-grouping', icon: Users, label: 'Class Grouping' }, // New from image
         { path: '/coordinators', icon: Users, label: 'Coordinadores' },
         { path: '/schedule', icon: Calendar, label: 'Schedule' }, // New from image
+        { path: '/study-plans', icon: BookOpen, label: 'Planes de Estudio' },
         { path: '/subjects', icon: FileText, label: 'Materias' },
+        { path: '/iq-config', icon: BookOpen, label: 'Config. Evaluaciones' },
         { path: '/finance', icon: CreditCard, label: 'Finance' },
         { path: '/reports', icon: FileText, label: 'Reports' },
         { path: '/settings', icon: Settings, label: 'Settings' },
