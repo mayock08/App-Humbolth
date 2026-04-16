@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, AlertCircle, ToggleLeft, ToggleRight, Calendar, Plus, X, Sparkles, Loader, CheckCircle } from 'lucide-react';
+import { Settings, Save, AlertCircle, ToggleLeft, ToggleRight, Calendar, Plus, X, Sparkles, Loader, CheckCircle, Eye, Edit } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 
 const IqTestConfig = () => {
@@ -30,6 +30,26 @@ const IqTestConfig = () => {
         educationalLevel: 'Primaria',
         customPrompt: ''
     });
+
+    // View Questions State
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [testDetails, setTestDetails] = useState(null);
+
+    // Manual Question State
+    const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+    const [manualQuestion, setManualQuestion] = useState({
+        sectionName: 'Sección Principal',
+        text: '',
+        difficulty: 1,
+        abilityDomain: 'General',
+        options: [
+            { optionKey: 'A', text: '', isCorrect: true },
+            { optionKey: 'B', text: '', isCorrect: false },
+            { optionKey: 'C', text: '', isCorrect: false },
+            { optionKey: 'D', text: '', isCorrect: false }
+        ]
+    });
+    const [savingManual, setSavingManual] = useState(false);
 
     const targetSkillsList = [
         'General IQ', 'Lógica', 'Matemáticas', 'Verbal', 'Memoria', 'Visual', 'Velocidad'
@@ -251,6 +271,110 @@ const IqTestConfig = () => {
         }
     };
 
+    const handleViewQuestions = async () => {
+        if (!selectedTestId) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/IqTests/${selectedTestId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTestDetails(data);
+                setIsViewModalOpen(true);
+            }
+        } catch (error) {
+            console.error('Error fetching test details:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOpenManualQuestion = () => {
+        const selectedTest = tests.find(t => t.id === selectedTestId);
+        setManualQuestion({
+            sectionName: 'Sección Principal',
+            text: '',
+            difficulty: 1,
+            abilityDomain: selectedTest?.targetSkill || 'General',
+            options: [
+                { optionKey: 'A', text: '', isCorrect: true },
+                { optionKey: 'B', text: '', isCorrect: false },
+                { optionKey: 'C', text: '', isCorrect: false },
+                { optionKey: 'D', text: '', isCorrect: false }
+            ]
+        });
+        setIsManualModalOpen(true);
+    };
+
+    const handleSaveManualQuestion = async () => {
+        if (!manualQuestion.text || manualQuestion.options.some(o => !o.text)) {
+            alert("Por favor completa el texto de la pregunta y todas las opciones.");
+            return;
+        }
+        if (!manualQuestion.options.some(o => o.isCorrect)) {
+            alert("Debe haber al menos una opción correcta.");
+            return;
+        }
+
+        setSavingManual(true);
+        const payload = {
+            sections: [
+                {
+                    name: manualQuestion.sectionName,
+                    questions: [
+                        {
+                            text: manualQuestion.text,
+                            difficulty: parseInt(manualQuestion.difficulty),
+                            abilityDomain: manualQuestion.abilityDomain,
+                            options: manualQuestion.options
+                        }
+                    ]
+                }
+            ]
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/IqTests/${selectedTestId}/import-questions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('¡Pregunta añadida correctamente!');
+                setIsManualModalOpen(false);
+                if (isViewModalOpen) {
+                    handleViewQuestions(); // Refresh list if open
+                }
+            } else {
+                alert('Error al añadir la pregunta.');
+            }
+        } catch (error) {
+            console.error('Error adding manual question:', error);
+            alert('Error de red al crear pregunta manual.');
+        } finally {
+            setSavingManual(false);
+        }
+    };
+
+    const handleManualOptionToggleCorrect = (index) => {
+        const newOptions = manualQuestion.options.map((o, i) => ({
+            ...o,
+            isCorrect: i === index
+        }));
+        setManualQuestion({ ...manualQuestion, options: newOptions });
+    };
+
+    const handleManualOptionTextChange = (index, text) => {
+        const newOptions = [...manualQuestion.options];
+        newOptions[index].text = text;
+        setManualQuestion({ ...manualQuestion, options: newOptions });
+    };
+
     const groupsByLevel = schoolGroups.reduce((acc, group) => {
         if (!acc[group.level]) acc[group.level] = [];
         acc[group.level].push(group);
@@ -300,13 +424,29 @@ const IqTestConfig = () => {
                                 Nueva Evaluación
                             </button>
                             {selectedTestId && (
-                                <button
-                                    onClick={() => setIsAiModalOpen(true)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl font-medium transition-colors border border-purple-200 shadow-sm"
-                                >
-                                    <Sparkles size={18} />
-                                    Generador IA
-                                </button>
+                                <>
+                                    <button
+                                        onClick={() => setIsAiModalOpen(true)}
+                                        className="flex items-center gap-2 px-6 py-3 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl font-medium transition-colors border border-purple-200 shadow-sm"
+                                    >
+                                        <Sparkles size={18} />
+                                        Generador IA
+                                    </button>
+                                    <button
+                                        onClick={handleViewQuestions}
+                                        className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl font-medium transition-colors border border-blue-200 shadow-sm"
+                                    >
+                                        <Eye size={18} />
+                                        Ver Preguntas
+                                    </button>
+                                    <button
+                                        onClick={handleOpenManualQuestion}
+                                        className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl font-medium transition-colors border border-green-200 shadow-sm"
+                                    >
+                                        <Edit size={18} />
+                                        Añadir Manual
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -600,6 +740,149 @@ const IqTestConfig = () => {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* View Questions Modal */}
+            {isViewModalOpen && testDetails && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-blue-100 bg-blue-50/50">
+                            <div className="flex items-center gap-3">
+                                <Eye className="text-blue-600" />
+                                <div>
+                                    <h3 className="font-bold text-blue-900 text-lg">Preguntas de la Evaluación</h3>
+                                    <p className="text-xs text-blue-600">{testDetails.name}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsViewModalOpen(false)} className="text-blue-400 hover:text-blue-700 transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 flex-1 overflow-y-auto">
+                            {testDetails.sections && testDetails.sections.length > 0 ? (
+                                <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+                                    {testDetails.sections.map((sec, i) => (
+                                        <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                                            <div className="bg-gray-100 px-5 py-3 border-b border-gray-200 flex justify-between items-center">
+                                                <h3 className="font-bold text-gray-800">{sec.name} <span className="text-sm font-normal text-gray-500 ml-2">({sec.questions?.length || 0} Preguntas)</span></h3>
+                                            </div>
+                                            <div className="divide-y divide-gray-100">
+                                                {sec.questions?.map((q, j) => (
+                                                    <div key={j} className="p-5">
+                                                        <p className="font-medium text-gray-900 mb-4"><span className="text-blue-600 mr-2">{j+1}.</span>{q.text}</p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-6">
+                                                            {q.options?.map((opt, k) => (
+                                                                <div key={k} className={`p-3 rounded-lg border ${opt.isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+                                                                    <span className="font-bold mr-2">{opt.optionKey}.</span>{opt.text}
+                                                                    {opt.isCorrect && <span className="float-right bg-green-200 text-green-900 text-xs px-2 py-0.5 rounded-full font-bold">✔</span>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-gray-500">
+                                    <p>No hay preguntas generadas para este examen aún.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Manual Question Modal */}
+            {isManualModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-green-100 bg-green-50/50">
+                            <div className="flex items-center gap-3">
+                                <Edit className="text-green-600" />
+                                <div>
+                                    <h3 className="font-bold text-green-900 text-lg">Añadir Pregunta Manual</h3>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsManualModalOpen(false)} className="text-green-400 hover:text-green-700 transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 flex-1 overflow-y-auto space-y-5">
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Sección</label>
+                                    <input 
+                                        type="text" 
+                                        className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
+                                        value={manualQuestion.sectionName}
+                                        onChange={(e) => setManualQuestion({...manualQuestion, sectionName: e.target.value})}
+                                    />
+                                </div>
+                                <div className="w-1/3">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Dificultad (1-10)</label>
+                                    <input 
+                                        type="number" min="1" max="10"
+                                        className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
+                                        value={manualQuestion.difficulty}
+                                        onChange={(e) => setManualQuestion({...manualQuestion, difficulty: parseInt(e.target.value)})}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Texto de la Pregunta</label>
+                                <textarea 
+                                    className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none min-h-[80px]"
+                                    value={manualQuestion.text}
+                                    placeholder="Escribe la pregunta aquí..."
+                                    onChange={(e) => setManualQuestion({...manualQuestion, text: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Opciones de Respuesta (Marca la correcta)</label>
+                                <div className="space-y-3">
+                                    {manualQuestion.options.map((opt, i) => (
+                                        <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border ${opt.isCorrect ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                                            <button 
+                                                onClick={() => handleManualOptionToggleCorrect(i)}
+                                                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border transition-all ${opt.isCorrect ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'bg-white border-gray-300'}`}
+                                            >
+                                                {opt.isCorrect && <CheckCircle size={14} />}
+                                            </button>
+                                            <span className="font-bold text-gray-600">{opt.optionKey}.</span>
+                                            <input 
+                                                type="text" 
+                                                className="w-full bg-transparent border-none outline-none focus:ring-0 text-gray-800"
+                                                placeholder={`Texto de la opción ${opt.optionKey}`}
+                                                value={opt.text}
+                                                onChange={(e) => handleManualOptionTextChange(i, e.target.value)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex justify-end gap-3 rounded-b-3xl">
+                            <button
+                                onClick={() => setIsManualModalOpen(false)}
+                                className="px-5 py-2 font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveManualQuestion}
+                                disabled={savingManual}
+                                className="px-8 py-2.5 font-semibold bg-green-600 text-white rounded-xl shadow-md hover:bg-green-700 transition-all flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {savingManual ? <Loader className="animate-spin" size={18} /> : <Save size={18} />}
+                                Guardar Pregunta
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
